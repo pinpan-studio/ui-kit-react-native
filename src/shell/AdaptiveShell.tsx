@@ -14,7 +14,15 @@ import { NavPanel } from './NavPanel';
 import { NavRail } from './NavRail';
 import { PaletteSheet } from './PaletteSheet';
 
+const EXTRA_TITLES: Record<string, string> = {
+  '/examples': 'Pages d’exemple',
+  '/pages-gallery': 'Galerie des pages',
+  '/showcases': 'Showcases',
+};
+
 function titleFor(pathname: string): string {
+  const extra = EXTRA_TITLES[pathname];
+  if (extra) return extra;
   const m = pathname.match(/^\/components\/([^/]+)/);
   if (m?.[1]) return categoryById(m[1])?.label ?? 'Composants';
   return DESTINATIONS[activeIndex(pathname)]?.label ?? 'UI Kit';
