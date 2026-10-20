@@ -62,10 +62,20 @@ __tests__/                tests du thème et du shell
 1. Cibles tactiles ≥ 48 × 48 dp (`KitIconButton`, `minHeight`).
 2. Zones sûres : fonds bord à bord, contenu hors encoche / barre d'état / barre de gestes.
 3. Clavier : `KeyboardSafe` garde le champ actif visible, le pied de page remonte.
-4. Navigation : barre en bas < 600 dp, rail 600–840 dp, panneau latéral au-delà.
+4. Navigation : barre en bas < 600 dp, rail 600–840 dp, panneau latéral au-delà (voir l'écart ci-dessous).
 5. Retour Android : `useBackClose` ferme d'abord la feuille ou le tiroir ouvert.
 6. Mode sombre et taille de texte : suit le système, aucune hauteur fixe sur les textes.
 7. Lecteurs d'écran : chaque bouton d'icône a un `accessibilityLabel` obligatoire, le décoratif est masqué.
+
+## Écart volontaire avec ui-kit-flutter : navigation sur grand écran
+
+- **Téléphone (< 600 dp)** : comportement identique à Flutter — barre de navigation en bas + tiroir
+  (menu) avec la recherche « Rechercher un composant… ».
+- **600–840 dp** : rail de navigation ; **≥ 840 dp** : panneau latéral permanent. Ces seuils sont les
+  classes de largeur _compact / medium / expanded_ de Material 3. Flutter garde la barre du bas à
+  toutes les largeurs ; on suit ici Material 3 pour les tablettes et l'orientation paysage.
+- **Harnais** : comme `kit_shell.dart`, toute la navigation est masquée ; le bouton « Quitter le
+  harnais » (✕, 48 dp) ou le retour Android ramènent à la destination précédente.
 
 ## APK de test, sans compte Expo
 
