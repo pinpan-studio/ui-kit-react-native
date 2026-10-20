@@ -1,0 +1,435 @@
+{
+  "source": {
+    "repo": "/workspace/ui-kit",
+    "branch": "fix/examples-responsive",
+    "commit": "c0789b623d93587540b02e69682db3665a3ded9c"
+  },
+  "counts": {
+    "total_entries": 53,
+    "component_routes": 46,
+    "redirects": 7,
+    "component_routes_by_group": {
+      "catalogue": 20,
+      "auth": 1,
+      "app": 17,
+      "forms": 6,
+      "other": 2
+    }
+  },
+  "layouts": {
+    "catalogue": "KitLayoutComponent (src/app/layouts/kit-layout/kit-layout.component.ts) wraps all catalogue routes; /examples/** and /harnais/** have no parent layout"
+  },
+  "routes": [
+    {
+      "path": "/",
+      "group": "catalogue",
+      "title": null,
+      "redirectTo": "ui-showcase"
+    },
+    {
+      "path": "/ui-showcase",
+      "group": "catalogue",
+      "title": "UI Showcase",
+      "component": "UiShowcaseComponent",
+      "file": "src/app/showcase/ui-showcase/ui-showcase.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/theme-studio",
+      "group": "catalogue",
+      "title": "Studio de thème",
+      "component": "ThemeStudioComponent",
+      "file": "src/app/showcase/theme-studio/theme-studio.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/pages",
+      "group": "catalogue",
+      "title": "Galerie des pages",
+      "component": "PagesGalleryComponent",
+      "file": "src/app/showcase/pages-gallery/pages-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/page-showcase",
+      "group": "catalogue",
+      "title": null,
+      "redirectTo": "pages"
+    },
+    {
+      "path": "/showcases",
+      "group": "catalogue",
+      "title": "Showcases",
+      "component": "ShowcasesGalleryComponent",
+      "file": "src/app/showcase/showcases/showcases-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/showcases/:id",
+      "group": "catalogue",
+      "title": "Showcase",
+      "component": "ShowcaseViewerComponent",
+      "file": "src/app/showcase/showcases/showcase-viewer.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/layouts",
+      "group": "catalogue",
+      "title": "Layouts",
+      "component": "LayoutsGalleryComponent",
+      "file": "src/app/showcase/layouts-gallery/layouts-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/**",
+      "group": "other",
+      "title": null,
+      "redirectTo": "ui-showcase"
+    },
+    {
+      "path": "/components",
+      "group": "catalogue",
+      "title": "Composants",
+      "component": "ComponentsIndexComponent",
+      "file": "src/app/showcase/components/components-index.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/typography",
+      "group": "catalogue",
+      "title": "Typographie",
+      "component": "TypographyGalleryComponent",
+      "file": "src/app/showcase/components/typography/typography-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/forms",
+      "group": "catalogue",
+      "title": "Formulaires",
+      "component": "FormsGalleryComponent",
+      "file": "src/app/showcase/components/forms/forms-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/fields",
+      "group": "catalogue",
+      "title": "Champs avancés",
+      "component": "FieldsGalleryComponent",
+      "file": "src/app/showcase/components/fields/fields-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/buttons",
+      "group": "catalogue",
+      "title": "Boutons",
+      "component": "ButtonsGalleryComponent",
+      "file": "src/app/showcase/components/buttons/buttons-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/navigation",
+      "group": "catalogue",
+      "title": "Navigation",
+      "component": "NavigationGalleryComponent",
+      "file": "src/app/showcase/components/navigation/navigation-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/data",
+      "group": "catalogue",
+      "title": "Data display",
+      "component": "DataGalleryComponent",
+      "file": "src/app/showcase/components/data/data-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/feedback",
+      "group": "catalogue",
+      "title": "Feedback",
+      "component": "FeedbackGalleryComponent",
+      "file": "src/app/showcase/components/feedback/feedback-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/planning",
+      "group": "catalogue",
+      "title": "Planning",
+      "component": "PlanningGalleryComponent",
+      "file": "src/app/showcase/components/planning/planning-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/maps",
+      "group": "catalogue",
+      "title": "Cartes",
+      "component": "MapsGalleryComponent",
+      "file": "src/app/showcase/components/maps/maps-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/media",
+      "group": "catalogue",
+      "title": "Médias",
+      "component": "MediaGalleryComponent",
+      "file": "src/app/showcase/components/media/media-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/interactions",
+      "group": "catalogue",
+      "title": "Interactions",
+      "component": "InteractionsGalleryComponent",
+      "file": "src/app/showcase/components/interactions/interactions-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/material",
+      "group": "catalogue",
+      "title": "Material & CDK",
+      "component": "MaterialGalleryComponent",
+      "file": "src/app/showcase/components/material/material-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/components/layout",
+      "group": "catalogue",
+      "title": "Layout",
+      "component": "LayoutGalleryComponent",
+      "file": "src/app/showcase/components/layout/layout-gallery.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples",
+      "group": "other",
+      "title": null,
+      "redirectTo": "app/dashboard"
+    },
+    {
+      "path": "/examples/auth",
+      "group": "auth",
+      "title": null,
+      "redirectTo": "auth/centered"
+    },
+    {
+      "path": "/examples/auth/:variant",
+      "group": "auth",
+      "title": "Connexion",
+      "component": "AuthExampleComponent",
+      "file": "src/app/examples/auth/auth-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app",
+      "group": "app",
+      "title": null,
+      "redirectTo": "app/dashboard"
+    },
+    {
+      "path": "/examples/app/dashboard",
+      "group": "app",
+      "title": "Tableau de bord",
+      "component": "DashboardExampleComponent",
+      "file": "src/app/examples/app/dashboard-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/clients",
+      "group": "app",
+      "title": "Clients",
+      "component": "ClientsExampleComponent",
+      "file": "src/app/examples/app/clients-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/clients/:id",
+      "group": "app",
+      "title": "Fiche client",
+      "component": "ClientDetailExampleComponent",
+      "file": "src/app/examples/app/client-detail-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/inbox",
+      "group": "app",
+      "title": "Messagerie",
+      "component": "InboxExampleComponent",
+      "file": "src/app/examples/app/inbox-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/catalog",
+      "group": "app",
+      "title": "Catalogue",
+      "component": "CatalogExampleComponent",
+      "file": "src/app/examples/app/catalog-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/board",
+      "group": "app",
+      "title": "Planning",
+      "component": "BoardExampleComponent",
+      "file": "src/app/examples/app/board-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/modules",
+      "group": "app",
+      "title": "Modules",
+      "component": "ModulesExampleComponent",
+      "file": "src/app/examples/app/modules-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/blog",
+      "group": "app",
+      "title": "Blog",
+      "component": "BlogExampleComponent",
+      "file": "src/app/examples/app/blog-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/blog/:slug",
+      "group": "app",
+      "title": "Article",
+      "component": "ArticleExampleComponent",
+      "file": "src/app/examples/app/article-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/docs",
+      "group": "app",
+      "title": "Documentation",
+      "component": "DocsExampleComponent",
+      "file": "src/app/examples/app/docs-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/files",
+      "group": "app",
+      "title": "Fichiers",
+      "component": "FilesExampleComponent",
+      "file": "src/app/examples/app/files-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/files/columns",
+      "group": "app",
+      "title": "Fichiers — colonnes",
+      "component": "FilesColumnsExampleComponent",
+      "file": "src/app/examples/app/files-columns-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/monitoring",
+      "group": "app",
+      "title": "Supervision",
+      "component": "MonitoringExampleComponent",
+      "file": "src/app/examples/app/monitoring-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/chat",
+      "group": "app",
+      "title": "Messagerie instantanée",
+      "component": "ChatExampleComponent",
+      "file": "src/app/examples/app/chat-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/feed",
+      "group": "app",
+      "title": "Fil d’équipe",
+      "component": "FeedExampleComponent",
+      "file": "src/app/examples/app/feed-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/forms",
+      "group": "forms",
+      "title": null,
+      "redirectTo": "forms/contact"
+    },
+    {
+      "path": "/examples/forms/contact",
+      "group": "forms",
+      "title": "Contact",
+      "component": "ContactFormComponent",
+      "file": "src/app/examples/forms/contact-form.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/forms/checkout",
+      "group": "forms",
+      "title": "Commande",
+      "component": "CheckoutFormComponent",
+      "file": "src/app/examples/forms/checkout-form.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/forms/onboarding",
+      "group": "forms",
+      "title": "Bienvenue",
+      "component": "OnboardingFormComponent",
+      "file": "src/app/examples/forms/onboarding-form.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/forms/survey",
+      "group": "forms",
+      "title": "Questionnaire",
+      "component": "SurveyFormComponent",
+      "file": "src/app/examples/forms/survey-form.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/forms/booking",
+      "group": "forms",
+      "title": "Réservation",
+      "component": "BookingFormComponent",
+      "file": "src/app/examples/forms/booking-form.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/forms/application",
+      "group": "forms",
+      "title": "Candidature",
+      "component": "ApplicationFormComponent",
+      "file": "src/app/examples/forms/application-form.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/examples/app/settings",
+      "group": "app",
+      "title": "Paramètres",
+      "component": "SettingsExampleComponent",
+      "file": "src/app/examples/app/settings-example.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/harnais",
+      "group": "other",
+      "title": "Harnais",
+      "component": "HarnaisComponent",
+      "file": "src/app/harnais/harnais.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/harnais/:id",
+      "group": "other",
+      "title": "Harnais",
+      "component": "HarnaisComponent",
+      "file": "src/app/harnais/harnais.component.ts",
+      "lazy": true
+    },
+    {
+      "path": "/main",
+      "group": "app",
+      "title": null,
+      "component": "AppShellComponent",
+      "file": "src/app/layouts/app-shell/app-shell.component.ts",
+      "lazy": false,
+      "note": "shell layout, children: [] (empty)"
+    }
+  ]
+}
