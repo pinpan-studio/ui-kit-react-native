@@ -26,7 +26,10 @@ export function activeIndex(pathname: string): number {
 
 export type NavMode = 'bar' | 'rail' | 'drawer';
 
-/** Règle Flutter : barre en bas < 600 dp, rail de 600 à 840 dp, panneau latéral au-delà. */
+/**
+ * Seuils des classes de largeur Material 3 (compact < 600 dp, medium 600–840 dp, expanded ≥ 840 dp) :
+ * barre en bas, rail, puis panneau latéral. Le kit Flutter n'a que la barre du bas + tiroir (cas compact).
+ */
 export function navModeFor(width: number): NavMode {
   if (width < 600) return 'bar';
   if (width < 840) return 'rail';

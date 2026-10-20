@@ -7,9 +7,11 @@ import { AdaptiveShell } from '../src/shell/AdaptiveShell';
 import { useThemeStore } from '../src/store/themeStore';
 import { KitThemeProvider } from '../src/theme/KitThemeProvider';
 
+let mockPath = '/';
+const mockNavigate = jest.fn();
 jest.mock('expo-router', () => ({
-  usePathname: () => '/',
-  router: { navigate: jest.fn(), back: jest.fn() },
+  usePathname: () => mockPath,
+  router: { navigate: (...a: unknown[]) => mockNavigate(...a), back: jest.fn() },
 }));
 
 let mockWidth = 390;
@@ -20,6 +22,8 @@ jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({
 
 beforeEach(() => {
   mockWidth = 390;
+  mockPath = '/';
+  mockNavigate.mockClear();
 });
 
 const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 47, left: 0, right: 0, bottom: 34 } };
@@ -76,5 +80,31 @@ describe('AdaptiveShell', () => {
     await fireEvent.press(screen.getByTestId('open-palette'));
     await fireEvent.press(screen.getByTestId('palette-red'));
     expect(useThemeStore.getState().paletteId).toBe('red');
+  });
+
+  it('Harnais : navigation masquée, sortie vers la destination précédente', async () => {
+    mockPath = '/layouts';
+    const r = await renderShell();
+    mockPath = '/harnais';
+    await r.rerender(
+      <SafeAreaProvider initialMetrics={metrics}>
+        <KitThemeProvider>
+          <AdaptiveShell>
+            <Text>Contenu</Text>
+          </AdaptiveShell>
+        </KitThemeProvider>
+      </SafeAreaProvider>,
+    );
+    expect(screen.queryByTestId('bottom-bar')).toBeNull();
+    await fireEvent.press(screen.getByLabelText('Quitter le harnais'));
+    expect(mockNavigate).toHaveBeenCalledWith('/layouts');
+  });
+
+  it('Harnais en tablette : ni rail ni panneau', async () => {
+    mockWidth = 1024;
+    mockPath = '/harnais';
+    await renderShell();
+    expect(screen.queryByTestId('side-panel')).toBeNull();
+    expect(screen.getByTestId('exit-harnais')).toBeTruthy();
   });
 });

@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Appbar, BottomNavigation, Modal, Portal } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,8 +21,10 @@ function titleFor(pathname: string): string {
 }
 
 /**
- * Shell adaptatif : barre d'application + navigation selon la largeur (règle Flutter) :
- * barre en bas < 600 dp, rail 600–840 dp, panneau latéral permanent au-delà.
+ * Shell adaptatif : barre d'application + navigation selon les classes de largeur Material 3 :
+ * barre en bas < 600 dp (comme Flutter, avec tiroir), rail 600–840 dp, panneau latéral permanent au-delà.
+ * Sur l'onglet Harnais, toute la navigation est masquée (comme kit_shell.dart) et une action de sortie
+ * ramène à la destination précédente.
  * Les fonds vont jusqu'aux bords ; le contenu respecte les zones sûres.
  */
 export function AdaptiveShell({ children }: { children: ReactNode }) {
@@ -30,8 +32,15 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
   const insets = useSafeAreaInsets();
   const theme = useKitTheme();
   const pathname = usePathname();
-  const navMode = navModeFor(width);
   const index = activeIndex(pathname);
+  const harnais = DESTINATIONS[index]?.key === 'harnais';
+  const navMode = navModeFor(width);
+  const lastOutside = useRef<string>('/');
+  useEffect(() => {
+    if (!harnais) lastOutside.current = pathname;
+  }, [harnais, pathname]);
+  const exitHarnais = useCallback(() => router.navigate(lastOutside.current as never), []);
+  useBackClose(harnais, exitHarnais);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pref = useThemeStore((s) => s.mode);
@@ -54,7 +63,14 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
   return (
     <View style={[styles.fill, { backgroundColor: theme.colors.background }]} testID={`adaptive-shell-${navMode}`}>
       <Appbar.Header mode="small" statusBarHeight={insets.top} style={{ backgroundColor: theme.colors.surface }}>
-        {canGoBack ? (
+        {harnais ? (
+          <KitIconButton
+            icon="close"
+            accessibilityLabel="Quitter le harnais"
+            onPress={exitHarnais}
+            testID="exit-harnais"
+          />
+        ) : canGoBack ? (
           <Appbar.BackAction accessibilityLabel="Retour" onPress={() => router.back()} />
         ) : navMode !== 'drawer' ? (
           <KitIconButton icon="menu" accessibilityLabel="Ouvrir le menu" onPress={() => setDrawerOpen(true)} />
@@ -76,8 +92,8 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
       </Appbar.Header>
 
       <View style={[styles.fill, styles.row]}>
-        {navMode === 'rail' && <NavRail index={index} onSelect={select} insetLeft={insets.left} />}
-        {navMode === 'drawer' && (
+        {!harnais && navMode === 'rail' && <NavRail index={index} onSelect={select} insetLeft={insets.left} />}
+        {!harnais && navMode === 'drawer' && (
           <View
             style={[styles.panel, { paddingLeft: insets.left, backgroundColor: theme.roles.surfaceContainerLow }]}
             testID="side-panel"
@@ -88,15 +104,15 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
         <View
           style={[
             styles.fill,
-            { paddingRight: insets.right, paddingLeft: navMode === 'bar' ? insets.left : 0 },
-            navMode !== 'bar' && { paddingBottom: insets.bottom },
+            { paddingRight: insets.right, paddingLeft: harnais || navMode === 'bar' ? insets.left : 0 },
+            (harnais || navMode !== 'bar') && { paddingBottom: insets.bottom },
           ]}
         >
           {children}
         </View>
       </View>
 
-      {navMode === 'bar' && (
+      {!harnais && navMode === 'bar' && (
         <BottomNavigation.Bar
           testID="bottom-bar"
           navigationState={{
