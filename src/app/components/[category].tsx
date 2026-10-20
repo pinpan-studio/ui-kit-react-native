@@ -2,6 +2,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { Text } from 'react-native-paper';
 
 import { Page } from '../../shell/Page';
+import { ButtonsGallery } from '../../showcase/components/ButtonsGallery';
 import { DocPage } from '../../showcase/doc/DocPage';
 import { categoryById } from '../../showcase/kitNav';
 
@@ -17,6 +18,7 @@ export default function CategoryPage() {
       </Page>
     );
   }
+  if (cat.id === 'buttons') return <ButtonsGallery initialSection={initial} />;
   return (
     <DocPage
       testID={`category-${cat.id}`}
