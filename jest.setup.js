@@ -8,3 +8,8 @@ jest.mock('@expo/vector-icons', () => {
   const Icon = ({ name }) => require('react').createElement(Text, null, name);
   return { MaterialCommunityIcons: Icon };
 });
+jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => {
+  const { Text } = require('react-native');
+  const Icon = ({ name }) => require('react').createElement(Text, null, name);
+  return { __esModule: true, default: Icon };
+});
