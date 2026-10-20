@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { BUTTON_VARIANTS, buttonColors, KitButton } from '../src/components/buttons';
+import { BUTTON_VARIANTS, buttonColors, KitButton, toneLight, toneText, type KitTone } from '../src/components/buttons';
 import { ButtonsGallery } from '../src/showcase/components/ButtonsGallery';
 import { categoryById } from '../src/showcase/kitNav';
 import { buildTheme } from '../src/theme/buildTheme';
@@ -62,6 +62,24 @@ describe('KitButton : couleurs', () => {
 
   it('success : contraste 6,54:1', () => {
     expect(ratio('#22c55e', '#052e16')).toBeCloseTo(6.54, 1);
+  });
+});
+
+describe('chips de filtre : texte de ton sur fond -light ≥ 4,5:1 (lot contraste)', () => {
+  const tones: KitTone[] = ['primary', 'success', 'warning', 'error'];
+  it.each(PALETTE_ORDER.flatMap((id) => MODES.map((m) => [id, m] as const)))('%s / %s', (id, mode) => {
+    const t = buildTheme(id, mode);
+    for (const tone of tones) {
+      const bg = over(toneLight(tone, t), t.colors.surface);
+      expect([tone, ratio(toneText(tone, t), bg) >= 4.5]).toEqual([tone, true]);
+    }
+  });
+  it('valeurs du lot : clair 800, sombre 300', () => {
+    const l = buildTheme('cyan', 'light');
+    const d = buildTheme('cyan', 'dark');
+    expect([toneText('success', l), toneText('warning', l)]).toEqual(['#166534', '#854d0e']);
+    expect([toneText('success', d), toneText('warning', d)]).toEqual(['#86efac', '#fde047']);
+    expect(toneText('error', d)).toBe('#ffdad6');
   });
 });
 

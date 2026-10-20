@@ -64,17 +64,22 @@ export function buttonColors(variant: KitButtonVariant, theme: KitTheme, disable
 
 export type KitTone = 'primary' | 'success' | 'warning' | 'error';
 
-/** Texte de ton (`tone.text` Flutter : successText, warningText, errorText). */
+/**
+ * Texte / icône de ton posé sur un fond « -light » (lot contraste, liste-kits.md) :
+ * clair → nuance 800 (#166534, #854d0e), sombre → 300 ; error garde le rôle M3
+ * (clair : error, sombre : on-error-container #ffdad6).
+ */
 export function toneText(tone: KitTone, theme: KitTheme): string {
+  const dark = theme.dark;
   switch (tone) {
     case 'primary':
       return theme.colors.primary;
     case 'success':
-      return theme.kit.successText;
+      return dark ? '#86efac' : '#166534';
     case 'warning':
-      return theme.kit.warningText;
+      return dark ? '#fde047' : '#854d0e';
     case 'error':
-      return theme.kit.errorText;
+      return dark ? theme.colors.onErrorContainer : theme.colors.error;
   }
 }
 
