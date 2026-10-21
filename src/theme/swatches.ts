@@ -38,3 +38,16 @@ export const HUE_STOPS = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff',
 /** Blanc et noir des dégradés saturation / valeur. */
 export const WHITE = '#ffffff';
 export const BLACK = '#000000';
+
+/** Scènes illustrées de démonstration (`DemoArt`) : ciel, collines, soleil / véhicule. */
+export const ART_PALETTES = [
+  ['#0ea5e9', '#006a6a', '#fde68a'],
+  ['#f97316', '#7c2d12', '#ffedd5'],
+  ['#8b5cf6', '#1e1b4b', '#f5d0fe'],
+  ['#22c55e', '#14532d', '#fef9c3'],
+  ['#ef4444', '#450a0a', '#fecaca'],
+  ['#06b6d4', '#083344', '#cffafe'],
+] as const;
+
+/** Bitume de la route des scènes `DemoArt`. */
+export const ART_ROAD = '#1f2937';

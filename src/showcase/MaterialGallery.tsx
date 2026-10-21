@@ -1,454 +1,616 @@
-import { useState } from 'react';
-import { Modal, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Card, Chip, IconButton, List, ProgressBar, Text, TextInput } from 'react-native-paper';
+import { useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Icon, TouchableRipple } from 'react-native-paper';
 
-import { Page } from '../shell/Page';
-import { radius, space } from '../theme/tokens';
-import { useKitTheme } from '../theme/useKitTheme';
+import {
+  DemoArt,
+  DragArea,
+  Draggable,
+  DropTarget,
+  ExpansionTile,
+  KitBottomSheet,
+  KitButton,
+  KitCard,
+  KitIconButton,
+  KitProgressBar,
+  ReorderList,
+  SheetHeader,
+  StatusBadge,
+  TagInput,
+  TreeView,
+} from '../components';
+import { date, number, time } from '../core/format';
+import { useKitSnack } from '../core/snack';
+import { DEMO_CLIENTS, FILES_TREE, VILLES } from '../data/showcase';
+import {
+  breakpoints,
+  elevation,
+  font,
+  kitText,
+  radius,
+  space,
+  toneColor,
+  toneLight,
+  toneText,
+  useKitTheme,
+  withAlpha,
+  type KitTone,
+} from '../theme';
+import { BLACK, WHITE } from '../theme/swatches';
+import { Demo, DocPage, type DocSection } from './doc';
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.section}>
-      <Text variant="titleMedium" accessibilityRole="header">
-        {title}
-      </Text>
-      <Card mode="outlined">
-        <Card.Content style={styles.content}>{children}</Card.Content>
-      </Card>
-    </View>
-  );
-}
+const PANELS: [string, string, string][] = [
+  ['Informations client', 'mi:business', 'Transports Yao & Fils · CLI-1040 · Abidjan, Yopougon'],
+  ['Contrat', 'mi:description', 'Premium — Flotte · 24 véhicules · échéance 28/02/2027'],
+  ['Facturation', 'mi:receipt-long', 'Virement à 30 jours · 1 250 000 FCFA / mois'],
+];
 
-export function MaterialGallery() {
-  const theme = useKitTheme();
-  const [expanded, setExpanded] = useState('client');
-  const [treeOpen, setTreeOpen] = useState<string[]>(['src', 'app']);
-  const [selected, setSelected] = useState('');
-  const [tasks, setTasks] = useState([
+const FAQ: [string, string][] = [
+  [
+    'Comment réinitialiser une balise ?',
+    'Envoyez la commande « cpureset » depuis la fiche équipement, ou coupez l’alimentation 30 s.',
+  ],
+  ['Quelle est la précision GPS ?', 'Entre 2 et 5 m en zone dégagée ; jusqu’à 15 m en milieu urbain dense.'],
+  ['Puis-je exporter l’historique ?', 'Oui, au format XLSX ou CSV depuis l’onglet Trajets (90 jours glissants).'],
+];
+
+const SUGGESTIONS = ['Abidjan', 'Bouaké', 'Poids lourds', 'Utilitaires', 'Premium', 'Essentiel', 'Impayés'];
+
+const SHARE: [string, string, KitTone][] = [
+  ['E-mail', 'mi:mail', 'info'],
+  ['WhatsApp', 'mi:chat', 'success'],
+  ['SMS', 'mi:sms', 'warning'],
+  ['Lien', 'mi:link', 'purple'],
+  ['Imprimer', 'mi:print', 'neutral'],
+];
+
+const ROW = 52;
+const VIRTUAL_COUNT = 10000;
+const VIRTUAL_HEIGHT = 280;
+const VIRTUAL_START = new Date(2026, 9, 15).getTime();
+
+const SHEET_BOX = 220;
+
+type Lane = 'todo' | 'done';
+
+/** `/components/material` — accordéon, arbre, glisser-déposer, puces, cartes, grille, feuille basse, liste virtualisée, ondulation. */
+export function MaterialGallery({ initialSection }: { initialSection?: string }) {
+  const { kit, roles, colorMode } = useKitTheme();
+  const snack = useKitSnack();
+  const { width } = useWindowDimensions();
+  const [panel, setPanel] = useState<number | null>(0);
+  const [treeSel, setTreeSel] = useState<{ id: string; label: string } | null>(null);
+  const [order, setOrder] = useState([
     'Vérifier l’alimentation 12 V',
     'Fixer le boîtier',
     'Brancher le relais',
     'Positionner l’antenne',
     'Tester la remontée GPS',
   ]);
-  const [todo, setTodo] = useState(['Balise CI-4521-AB', 'Sonde carburant SOTRA', 'Caméra Actros']);
-  const [done, setDone] = useState(['Firmware 12 balises']);
-  const [tags, setTags] = useState(['Abidjan', 'Poids lourds', 'Premium']);
-  const [tagInput, setTagInput] = useState('');
-  const [sheet, setSheet] = useState(false);
-  const [visibleRows, setVisibleRows] = useState(12);
-  const [ripples, setRipples] = useState(0);
+  const [lanes, setLanes] = useState<Record<Lane, string[]>>({
+    todo: ['Balise CI-4521-AB', 'Sonde carburant SOTRA', 'Caméra Actros'],
+    done: ['Firmware 12 balises'],
+  });
+  const [chips, setChips] = useState(['Abidjan', 'Poids lourds', 'Premium']);
+  const [share, setShare] = useState(false);
+  const [sheetRatio, setSheetRatio] = useState(0.35);
+  const sheetStart = useRef({ y: 0, ratio: 0 });
+  const [offset, setOffset] = useState(0);
+  const [virtualTap, setVirtualTap] = useState(-1);
 
-  const toggleTree = (id: string) =>
-    setTreeOpen((items) => (items.includes(id) ? items.filter((item) => item !== id) : [...items, id]));
-  const shiftTask = (index: number, delta: number) =>
-    setTasks((items) => {
-      const next = [...items];
-      const to = Math.max(0, Math.min(items.length - 1, index + delta));
-      const item = next.splice(index, 1)[0];
-      if (item) next.splice(to, 0, item);
-      return next;
+  const move = (item: string, to: Lane) =>
+    setLanes((l) => {
+      const from: Lane = to === 'todo' ? 'done' : 'todo';
+      return { ...l, [from]: l[from].filter((x) => x !== item), [to]: [...l[to], item] };
     });
 
-  return (
-    <Page testID="category-material">
-      <Text variant="titleLarge" accessibilityRole="header">
-        Material
-      </Text>
-      <Text variant="bodyLarge">
-        Accordéons, arbre, réorganisation, saisie de tags, cartes, grille, feuille basse, liste virtualisée et retours
-        tactiles.
-      </Text>
-      <Section title="Accordion / Expansion panel">
-        {(
-          [
-            ['client', 'Informations client', 'Transports Yao & Fils · CLI-1040 · Abidjan, Yopougon'],
-            ['contract', 'Contrat', 'Premium — Flotte · 24 véhicules · échéance 28/02/2027'],
-            ['billing', 'Facturation', 'Virement à 30 jours · 1 250 000 FCFA / mois'],
-          ] as const
-        ).map(([id, title, detail]) => (
-          <List.Accordion
-            key={id}
-            title={title}
-            expanded={expanded === id}
-            onPress={() => setExpanded(expanded === id ? '' : id)}
-            left={(p) => (
-              <List.Icon
-                {...p}
-                icon={id === 'client' ? 'domain' : id === 'contract' ? 'file-document-outline' : 'receipt-text-outline'}
-              />
-            )}
+  const lane = (key: Lane, title: string, tone: KitTone) => {
+    const items = lanes[key];
+    const other: Lane = key === 'todo' ? 'done' : 'todo';
+    return (
+      <DropTarget
+        id={key}
+        accepts={(d) => typeof d === 'string' && !items.includes(d)}
+        onDrop={(d) => move(String(d), key)}
+        style={styles.fill}
+      >
+        {(hovering) => (
+          <View
+            style={[
+              styles.lane,
+              {
+                backgroundColor: hovering ? toneLight(tone, kit) : withAlpha(kit.hover, 0.5),
+                borderColor: hovering ? toneColor(tone, kit) : 'transparent',
+              },
+            ]}
           >
-            <List.Item title={detail} description="Appuyez sur l’en-tête pour développer ou réduire." />
-          </List.Accordion>
-        ))}
-        <Text variant="labelLarge">Questions fréquentes</Text>
-        {(
-          [
-            ['Comment réinitialiser une balise ?', 'Envoyez la commande « cpureset » ou coupez l’alimentation 30 s.'],
-            ['Quelle est la précision GPS ?', 'Entre 2 et 5 m en zone dégagée ; jusqu’à 15 m en ville.'],
-            ['Puis-je exporter l’historique ?', 'Oui, au format XLSX ou CSV depuis l’onglet Trajets.'],
-          ] as const
-        ).map(([q, a]) => (
-          <List.Accordion key={q} title={q}>
-            <List.Item title={a} />
-          </List.Accordion>
-        ))}
-      </Section>
+            <Text style={[font('700', 12.5), { color: toneText(tone, kit) }]}>{`${title} (${items.length})`}</Text>
+            {items.map((it) => (
+              <Draggable
+                key={it}
+                data={it}
+                width={150}
+                accessibilityLabel={it}
+                accessibilityActions={[
+                  { name: 'move', label: `Déplacer vers ${other === 'done' ? 'Terminé' : 'À faire'}` },
+                ]}
+                onAccessibilityAction={() => move(it, other)}
+                ghost={
+                  <View style={[styles.laneCard, { backgroundColor: kit.card }]}>
+                    <Text style={[font('400', 12.5), { color: kit.textPrimary }]}>{it}</Text>
+                  </View>
+                }
+              >
+                <View style={[styles.laneCard, { backgroundColor: kit.card }]}>
+                  <Text style={[font('400', 12.5), { color: kit.textPrimary }]}>{it}</Text>
+                </View>
+              </Draggable>
+            ))}
+          </View>
+        )}
+      </DropTarget>
+    );
+  };
 
-      <Section title="Tree">
-        <TreeRow
-          label="src"
-          id="src"
-          level={0}
-          open={treeOpen.includes('src')}
-          selected={selected === 'src'}
-          onToggle={toggleTree}
-          onSelect={setSelected}
-        />
-        {treeOpen.includes('src') ? (
-          <>
-            <TreeRow
-              label="app"
-              id="app"
-              level={1}
-              open={treeOpen.includes('app')}
-              selected={selected === 'app'}
-              onToggle={toggleTree}
-              onSelect={setSelected}
-            />
-            {treeOpen.includes('app') ? (
-              <>
-                <TreeRow
-                  label="index.tsx"
-                  id="index"
-                  level={2}
-                  file
-                  selected={selected === 'index'}
-                  onSelect={setSelected}
-                />
-                <TreeRow
-                  label="components/"
-                  id="components"
-                  level={2}
-                  open={treeOpen.includes('components')}
-                  selected={selected === 'components'}
-                  onToggle={toggleTree}
-                  onSelect={setSelected}
-                />
-                {treeOpen.includes('components') ? (
-                  <TreeRow
-                    label="[category].tsx"
-                    id="category"
-                    level={3}
-                    file
-                    selected={selected === 'category'}
-                    onSelect={setSelected}
-                  />
-                ) : null}
-              </>
-            ) : null}
-            <TreeRow
-              label="theme/"
-              id="theme"
-              level={1}
-              open={treeOpen.includes('theme')}
-              selected={selected === 'theme'}
-              onToggle={toggleTree}
-              onSelect={setSelected}
-            />
-            {treeOpen.includes('theme') ? (
-              <TreeRow
-                label="buildTheme.ts"
-                id="buildTheme"
-                level={2}
-                file
-                selected={selected === 'buildTheme'}
-                onSelect={setSelected}
-              />
-            ) : null}
-          </>
-        ) : null}
-        {selected ? <Text variant="bodySmall">Sélection : {selected}</Text> : null}
-      </Section>
+  const gridCols = width >= breakpoints.tablet ? 4 : 2;
+  const first = Math.max(0, Math.floor(offset / ROW) - 4);
+  const last = Math.min(VIRTUAL_COUNT, Math.ceil((offset + VIRTUAL_HEIGHT) / ROW) + 4);
+  const visible = Array.from({ length: last - first }, (_, k) => first + k);
 
-      <Section title="Drag & drop">
-        <Text variant="labelLarge">Checklist de pose · utilisez les flèches pour réordonner</Text>
-        {tasks.map((task, index) => (
-          <List.Item
-            key={task}
-            title={task}
-            left={() => <Text style={styles.number}>{index + 1}</Text>}
-            right={() => (
-              <View style={styles.moveButtons}>
-                <IconButton
-                  icon="chevron-up"
-                  accessibilityLabel={`Monter ${task}`}
-                  disabled={index === 0}
-                  onPress={() => shiftTask(index, -1)}
-                />
-                <IconButton
-                  icon="chevron-down"
-                  accessibilityLabel={`Descendre ${task}`}
-                  disabled={index === tasks.length - 1}
-                  onPress={() => shiftTask(index, 1)}
-                />
+  const sections: DocSection[] = [
+    {
+      id: 'accordion',
+      title: 'Accordion / Expansion panel',
+      source: 'ExpansionTile',
+      cols: 2,
+      children: [
+        <Demo key="radio" label="Panneau unique ouvert" flush>
+          {PANELS.map(([t, ic, body], i) => (
+            <ExpansionTile
+              key={t}
+              title={t}
+              icon={ic}
+              divider={i > 0}
+              expanded={panel === i}
+              onToggle={(open) => setPanel(open ? i : null)}
+            >
+              <Text style={[font('400', 14), { color: kit.textSecondary }]}>{body}</Text>
+            </ExpansionTile>
+          ))}
+        </Demo>,
+        <Demo key="faq" label="FAQ (multiples)" flush>
+          {FAQ.map(([q, a]) => (
+            <ExpansionTile key={q} title={q}>
+              <Text style={[font('400', 14), { color: kit.textSecondary }]}>{a}</Text>
+            </ExpansionTile>
+          ))}
+        </Demo>,
+      ],
+    },
+    {
+      id: 'tree',
+      title: 'Tree',
+      source: 'TreeView (TreeNodeData)',
+      children: (
+        <Demo label="Explorateur de fichiers" hint={treeSel?.label} flush>
+          <TreeView
+            nodes={FILES_TREE}
+            initiallyOpen={['src', 'app']}
+            selected={treeSel?.id}
+            onSelect={(n) => setTreeSel({ id: n.id, label: n.label })}
+          />
+        </Demo>
+      ),
+    },
+    {
+      id: 'drag-drop',
+      title: 'Drag & drop',
+      source: 'ReorderList · Draggable / DropTarget',
+      description: 'Réordonner avec la poignée ; déplacer une carte entre deux listes par appui long.',
+      cols: 2,
+      children: [
+        <Demo key="reorder" label="Réordonner (checklist de pose)" flush>
+          <ReorderList
+            items={order}
+            onReorder={(from, to) =>
+              setOrder((o) => {
+                const next = [...o];
+                const [it] = next.splice(from, 1);
+                if (it !== undefined) next.splice(to, 0, it);
+                return next;
+              })
+            }
+            renderItem={(t, i) => (
+              <View style={styles.reorderItem}>
+                <View style={[styles.stepDot, { backgroundColor: kit.primaryLight }]}>
+                  <Text style={[font('700', 12), { color: kit.primary }]}>{i + 1}</Text>
+                </View>
+                <Text numberOfLines={1} style={[font('500', 14), styles.fill, { color: kit.textPrimary }]}>
+                  {t}
+                </Text>
               </View>
             )}
           />
-        ))}
-        <View style={styles.twoLists}>
-          <View style={styles.listColumn}>
-            <Text variant="labelLarge">À faire</Text>
-            {todo.map((item) => (
-              <Chip
-                key={item}
-                onPress={() => {
-                  setTodo((items) => items.filter((value) => value !== item));
-                  setDone((items) => [...items, item]);
-                }}
+        </Demo>,
+        <Demo key="lanes" label="Entre deux listes">
+          <DragArea style={styles.lanes}>
+            {lane('todo', 'À faire', 'warning')}
+            {lane('done', 'Terminé', 'success')}
+          </DragArea>
+        </Demo>,
+      ],
+    },
+    {
+      id: 'chips-input',
+      title: 'Chips input',
+      source: 'TagInput · InputChip',
+      children: (
+        <Demo label="Critères de segmentation">
+          <TagInput tags={chips} suggestions={SUGGESTIONS} onChange={setChips} />
+        </Demo>
+      ),
+    },
+    {
+      id: 'card',
+      title: 'Card',
+      source: 'KitCard (elevated · média · outlined)',
+      cols: 3,
+      children: [
+        <Demo key="elevated" label="Elevated" muted>
+          <KitCard shadow padding={0}>
+            <View style={styles.tile}>
+              <Icon source="mi:local-shipping" size={24} color={kit.textSecondary} />
+              <View style={styles.fill}>
+                <Text style={[font('500', 14), { color: kit.textPrimary }]}>Toyota Hilux</Text>
+                <Text style={[font('400', 12.5), { color: kit.textSecondary }]}>CI-1024-AB</Text>
+              </View>
+              <KitIconButton
+                icon="mi:more-vert"
+                accessibilityLabel="Options"
+                onPress={() => snack.demoAction('Options du véhicule')}
+              />
+            </View>
+          </KitCard>
+        </Demo>,
+        <Demo key="media" label="Média + actions">
+          <KitCard padding={0}>
+            <View style={styles.media}>
+              <DemoArt seed={0} label="Dépôt de Koumassi" />
+            </View>
+            <View style={styles.mediaText}>
+              <Text style={[font('500', 14), { color: kit.textPrimary }]}>Dépôt de Koumassi</Text>
+              <Text style={[font('400', 12.5), { color: kit.textSecondary }]}>12 véhicules · 3 techniciens</Text>
+            </View>
+            <View style={styles.actions}>
+              <KitButton label="Itinéraire" variant="ghost" onPress={() => snack.demoAction('Itinéraire')} />
+              <KitButton label="Détails" variant="ghost" onPress={() => snack.demoAction('Détails du dépôt')} />
+            </View>
+          </KitCard>
+        </Demo>,
+        <Demo key="outlined" label="Outlined">
+          <KitCard borderColor={kit.border}>
+            <Text style={[font('700', 11), styles.overline, { color: kit.textMuted }]}>ABONNEMENT</Text>
+            <Text style={[kitText.cardTitle, styles.mt4, { color: kit.textPrimary }]}>Premium — Flotte</Text>
+            <View style={styles.mt6}>
+              <KitProgressBar value={0.62} />
+            </View>
+            <Text style={[font('400', 12), styles.mt4, { color: kit.textSecondary }]}>62 % de la période écoulée</Text>
+          </KitCard>
+        </Demo>,
+      ],
+    },
+    {
+      id: 'grid-list',
+      title: 'Grid list',
+      source: 'ResponsiveGrid + tuile',
+      children: (
+        <Demo label="Sites clients">
+          <View style={styles.grid}>
+            {VILLES.slice(0, 6).map((v, i) => (
+              <View
+                key={v}
+                style={[styles.gridTile, { width: `${100 / gridCols}%` }]}
+                accessible
+                accessibilityLabel={`${v}, ${3 + i * 2} sites`}
               >
-                {item}
-              </Chip>
+                <View style={styles.gridInner}>
+                  <DemoArt seed={i} />
+                  <View style={[styles.gridBar, { backgroundColor: withAlpha(BLACK, 0.45) }]}>
+                    <View style={styles.fill}>
+                      <Text numberOfLines={1} style={[font('400', 16), { color: WHITE }]}>
+                        {v}
+                      </Text>
+                      <Text style={[font('400', 12), { color: WHITE }]}>{`${3 + i * 2} sites`}</Text>
+                    </View>
+                    <Icon source="mi:chevron-right" size={24} color={WHITE} />
+                  </View>
+                </View>
+              </View>
             ))}
           </View>
-          <View style={styles.listColumn}>
-            <Text variant="labelLarge">Terminé</Text>
-            {done.map((item) => (
-              <Chip
-                key={item}
-                onPress={() => {
-                  setDone((items) => items.filter((value) => value !== item));
-                  setTodo((items) => [...items, item]);
-                }}
-              >
-                {item}
-              </Chip>
-            ))}
+        </Demo>
+      ),
+    },
+    {
+      id: 'bottom-sheet',
+      title: 'Bottom sheet',
+      source: 'KitBottomSheet',
+      cols: 2,
+      children: [
+        <Demo key="modal" label="Partage">
+          <View style={styles.start}>
+            <KitButton label="Partager" icon="mi:share" variant="tonal" onPress={() => setShare(true)} />
           </View>
-        </View>
-      </Section>
-
-      <Section title="Chips input">
-        <TextInput
-          label="Ajouter un critère"
-          mode="outlined"
-          value={tagInput}
-          onChangeText={setTagInput}
-          onSubmitEditing={() => {
-            if (tagInput.trim()) setTags((items) => [...items, tagInput.trim()]);
-            setTagInput('');
-          }}
-          right={
-            <TextInput.Icon
-              icon="plus"
-              onPress={() => {
-                if (tagInput.trim()) setTags((items) => [...items, tagInput.trim()]);
-                setTagInput('');
-              }}
-            />
-          }
-        />
-        <View style={styles.row}>
-          {tags.map((tag) => (
-            <Chip key={tag} onClose={() => setTags((items) => items.filter((item) => item !== tag))}>
-              {tag}
-            </Chip>
-          ))}
-        </View>
-        <Text variant="bodySmall">Suggestions : Bouaké · Utilitaires · Essentiel · Impayés</Text>
-      </Section>
-
-      <Section title="Card">
-        <Card mode="elevated">
-          <Card.Title
-            title="Toyota Hilux"
-            subtitle="CI-1024-AB"
-            left={(p) => <List.Icon {...p} icon="truck-outline" />}
-            right={(p) => <IconButton {...p} icon="dots-vertical" accessibilityLabel="Options du véhicule" />}
-          />
-        </Card>
-        <Card mode="contained">
-          <Card.Content style={styles.content}>
-            <View style={[styles.art, { backgroundColor: theme.colors.primaryContainer }]}>
-              <Text variant="titleMedium">Dépôt de Koumassi</Text>
-            </View>
-            <Text variant="titleMedium">Dépôt de Koumassi</Text>
-            <Text>12 véhicules · 3 techniciens</Text>
-            <View style={styles.row}>
-              <Button>Itinéraire</Button>
-              <Button>Détails</Button>
-            </View>
-          </Card.Content>
-        </Card>
-        <Card mode="outlined">
-          <Card.Content style={styles.content}>
-            <Text variant="labelMedium">ABONNEMENT</Text>
-            <Text variant="titleLarge">Premium — Flotte</Text>
-            <ProgressBar progress={0.62} />
-            <Text variant="bodySmall">62 % de la période écoulée</Text>
-          </Card.Content>
-        </Card>
-      </Section>
-
-      <Section title="Grid list">
-        <View style={styles.grid}>
-          {['Abidjan', 'Bouaké', 'Yamoussoukro', 'San-Pédro', 'Korhogo', 'Man'].map((city, index) => (
-            <Card
-              key={city}
-              mode="contained"
+        </Demo>,
+        <Demo key="persistent" label="Feuille persistante (aperçu)" flush>
+          <View style={styles.sheetBox}>
+            <DemoArt seed={5} />
+            <View
               style={[
-                styles.gridItem,
-                {
-                  backgroundColor: [
-                    theme.colors.primaryContainer,
-                    theme.colors.secondaryContainer,
-                    theme.colors.tertiaryContainer,
-                  ][index % 3],
-                },
+                styles.inlineSheet,
+                elevation(3, colorMode),
+                { height: SHEET_BOX * sheetRatio, backgroundColor: roles.surfaceContainerLow },
               ]}
             >
-              <Card.Content style={styles.gridContent}>
-                <Text variant="headlineSmall">{['⌖', '◉', '◌', '◎', '⊙', '◇'][index]}</Text>
-                <Text variant="labelLarge">{city}</Text>
-                <Text variant="bodySmall">{3 + index * 2} sites</Text>
-              </Card.Content>
-            </Card>
-          ))}
-        </View>
-      </Section>
-
-      <Section title="Bottom sheet">
-        <Button mode="contained-tonal" icon="share-outline" onPress={() => setSheet(true)}>
-          Partager le rapport
-        </Button>
-        <Modal visible={sheet} transparent animationType="slide" onRequestClose={() => setSheet(false)}>
-          <View style={styles.sheetBackdrop}>
-            <View style={[styles.sheet, { backgroundColor: theme.colors.surface }]}>
-              <View style={styles.sheetHandle} />
-              <Text variant="titleLarge">Partager le rapport</Text>
-              <Text>Choisissez un format à envoyer.</Text>
-              <List.Item
-                title="Copier le lien"
-                left={(p) => <List.Icon {...p} icon="link-variant" />}
-                onPress={() => setSheet(false)}
-              />
-              <List.Item
-                title="Envoyer par e-mail"
-                left={(p) => <List.Icon {...p} icon="email-outline" />}
-                onPress={() => setSheet(false)}
-              />
-              <Button mode="contained" onPress={() => setSheet(false)}>
-                Fermer
-              </Button>
+              <View
+                accessible
+                accessibilityRole="adjustable"
+                accessibilityLabel="Hauteur de la feuille"
+                accessibilityValue={{ text: `${Math.round(sheetRatio * 100)} %` }}
+                accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+                onAccessibilityAction={(e) =>
+                  setSheetRatio((r) => (e.nativeEvent.actionName === 'increment' ? 0.95 : r > 0.35 ? 0.35 : 0.2))
+                }
+                onStartShouldSetResponder={() => true}
+                onResponderTerminationRequest={() => false}
+                onResponderGrant={(e) => {
+                  sheetStart.current = { y: e.nativeEvent.pageY, ratio: sheetRatio };
+                }}
+                onResponderMove={(e) => {
+                  const dy = e.nativeEvent.pageY - sheetStart.current.y;
+                  setSheetRatio(Math.min(0.95, Math.max(0.2, sheetStart.current.ratio - dy / SHEET_BOX)));
+                }}
+                style={styles.grab}
+              >
+                <View style={[styles.grabber, { backgroundColor: kit.textMuted }]} />
+              </View>
+              <ScrollView nestedScrollEnabled contentContainerStyle={styles.sheetContent}>
+                <Text style={[font('700', 14), { color: kit.textPrimary }]}>8 véhicules à proximité</Text>
+                {DEMO_CLIENTS.slice(0, 6).map((x) => (
+                  <View key={x.id} style={styles.denseRow}>
+                    <Icon source="truck-outline" size={22} color={kit.textSecondary} />
+                    <Text numberOfLines={1} style={[font('500', 14), styles.fill, { color: kit.textPrimary }]}>
+                      {x.raisonSociale}
+                    </Text>
+                  </View>
+                ))}
+              </ScrollView>
             </View>
           </View>
-        </Modal>
-      </Section>
+        </Demo>,
+      ],
+    },
+    {
+      id: 'virtual-scroll',
+      title: 'Virtual scroll',
+      source: 'fenêtrage manuel (hauteur de ligne fixe)',
+      description: '10 000 positions GPS : seules les lignes visibles sont construites.',
+      children: (
+        <Demo label="10 000 lignes" hint={virtualTap < 0 ? undefined : `ligne ${number(virtualTap + 1)}`} flush>
+          <ScrollView
+            nestedScrollEnabled
+            style={styles.virtual}
+            scrollEventThrottle={16}
+            onScroll={(e) => setOffset(e.nativeEvent.contentOffset.y)}
+          >
+            <View style={{ height: VIRTUAL_COUNT * ROW }}>
+              {visible.map((i) => {
+                const t = new Date(VIRTUAL_START + i * 30000);
+                const speed = (i * 37) % 95;
+                const tone: KitTone = speed > 80 ? 'error' : speed === 0 ? 'neutral' : 'success';
+                return (
+                  <TouchableRipple
+                    key={i}
+                    onPress={() => setVirtualTap(i)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: i === virtualTap }}
+                    style={[
+                      styles.virtualRow,
+                      { top: i * ROW },
+                      i === virtualTap && { backgroundColor: kit.primaryLight },
+                    ]}
+                  >
+                    <>
+                      <Text style={[font('400', 11, 'mono'), styles.virtualIdx, { color: kit.textMuted }]}>
+                        {`#${number(i + 1)}`}
+                      </Text>
+                      <View style={styles.fill}>
+                        <Text
+                          style={[
+                            font('400', 12.5, 'mono'),
+                            { color: i === virtualTap ? kit.primary : kit.textPrimary },
+                          ]}
+                        >
+                          {`${(5.3 + (i % 97) / 1000).toFixed(4)}, ${(-4.01 - (i % 89) / 1000).toFixed(4)}`}
+                        </Text>
+                        <Text style={[font('400', 12), { color: kit.textSecondary }]}>
+                          {`${date(t)} à ${time(t.getHours(), t.getMinutes())}`}
+                        </Text>
+                      </View>
+                      <View style={styles.badgeCell}>
+                        <StatusBadge label={`${speed} km/h`} tone={tone} uppercase={false} />
+                      </View>
+                    </>
+                  </TouchableRipple>
+                );
+              })}
+            </View>
+          </ScrollView>
+        </Demo>
+      ),
+    },
+    {
+      id: 'ripple',
+      title: 'Ripple',
+      source: 'TouchableRipple',
+      cols: 3,
+      children: [
+        <Demo key="primary" label="Ondulation primaire">
+          <TouchableRipple
+            onPress={() => undefined}
+            rippleColor={withAlpha(kit.primary, 0.25)}
+            accessibilityRole="button"
+            style={[styles.rippleBox, { backgroundColor: kit.primaryLight }]}
+          >
+            <Text style={[font('700', 14), { color: kit.primary }]}>Touchez-moi</Text>
+          </TouchableRipple>
+        </Demo>,
+        <Demo key="centered" label="Ondulation centrée">
+          <View style={styles.centerItems}>
+            <TouchableRipple
+              onPress={() => undefined}
+              borderless
+              rippleColor={withAlpha(kit.tertiary, 0.3)}
+              accessibilityRole="button"
+              accessibilityLabel="Empreinte"
+              style={[styles.rippleCircle, { backgroundColor: kit.tertiaryLight }]}
+            >
+              <Icon source="mi:fingerprint" size={40} color={kit.tertiary} />
+            </TouchableRipple>
+          </View>
+        </Demo>,
+        <Demo key="unbounded" label="Sans limite (unbounded)">
+          <View style={styles.unbounded}>
+            <TouchableRipple
+              onPress={() => undefined}
+              borderless
+              rippleColor={withAlpha(kit.error, 0.2)}
+              accessibilityRole="button"
+              accessibilityLabel="J’aime"
+              style={styles.unboundedHit}
+            >
+              <Icon source="mi:favorite" size={36} color={kit.error} />
+            </TouchableRipple>
+          </View>
+        </Demo>,
+      ],
+    },
+  ];
 
-      <Section title="Virtual scroll">
-        <Text variant="bodySmall">Éléments 1–{Math.min(visibleRows, 100)} sur 100 · fenêtre locale paginée</Text>
-        <ScrollView nestedScrollEnabled style={styles.virtualList}>
-          {Array.from({ length: Math.min(visibleRows, 100) }, (_, index) => (
-            <List.Item
-              key={index}
-              title={`Intervention INT-${String(4100 + index).padStart(4, '0')}`}
-              description={`${['Abidjan', 'Bouaké', 'Cocody', 'Yopougon'][index % 4]} · ${['En attente', 'En cours', 'Clôturée'][index % 3]}`}
-              left={(p) => <List.Icon {...p} icon="clipboard-text-outline" />}
-            />
-          ))}
-        </ScrollView>
-        <Button
-          icon="chevron-down"
-          onPress={() => setVisibleRows(Math.min(100, visibleRows + 12))}
-          disabled={visibleRows >= 100}
-        >
-          Charger plus
-        </Button>
-      </Section>
-
-      <Section title="Ripple">
-        <Text variant="bodyMedium">Touchez les éléments pour voir leur état sélectionné.</Text>
-        <View style={styles.row}>
-          <Button mode="text" icon="gesture-tap" onPress={() => setRipples(ripples + 1)}>
-            Bouton texte
-          </Button>
-          <Button mode="outlined" icon="gesture-tap" onPress={() => setRipples(ripples + 1)}>
-            Bouton contour
-          </Button>
-          <IconButton
-            mode="contained-tonal"
-            icon="heart-outline"
-            accessibilityLabel="Ajouter aux favoris"
-            onPress={() => setRipples(ripples + 1)}
-          />
-        </View>
-        <Text variant="bodySmall">Interactions : {ripples}</Text>
-      </Section>
-    </Page>
-  );
-}
-
-function TreeRow({
-  label,
-  id,
-  level,
-  open,
-  selected,
-  file = false,
-  onToggle,
-  onSelect,
-}: {
-  label: string;
-  id: string;
-  level: number;
-  open?: boolean;
-  selected: boolean;
-  file?: boolean;
-  onToggle?: (id: string) => void;
-  onSelect: (id: string) => void;
-}) {
   return (
-    <List.Item
-      title={label}
-      style={{ paddingLeft: level * 20 }}
-      left={(p) => <List.Icon {...p} icon={file ? 'file-outline' : open ? 'folder-open-outline' : 'folder-outline'} />}
-      right={() =>
-        !file ? (
-          <IconButton
-            icon={open ? 'chevron-down' : 'chevron-right'}
-            accessibilityLabel={`${open ? 'Réduire' : 'Développer'} ${label}`}
-            onPress={() => onToggle?.(id)}
-          />
-        ) : null
-      }
-      onPress={() => (file ? onSelect(id) : onToggle?.(id))}
-      description={selected ? 'Sélectionné' : undefined}
-    />
+    <View style={styles.fill}>
+      <DocPage
+        title="Material"
+        icon="mi:extension"
+        initialSection={initialSection}
+        testID="category-material"
+        subtitle="Composants Material habillés aux couleurs du kit : accordéon, arbre, glisser-déposer, saisie de puces, cartes, grille, feuille basse, liste virtualisée et effet d’ondulation — tous interactifs, données locales."
+        sections={sections}
+      />
+      <KitBottomSheet visible={share} onDismiss={() => setShare(false)}>
+        <SheetHeader title="Partager le rapport" />
+        <View style={styles.shareRow}>
+          {SHARE.map(([l, ic, tone]) => (
+            <TouchableRipple
+              key={l}
+              borderless
+              onPress={() => {
+                setShare(false);
+                snack.demoAction(`Partage par ${l}`);
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`Partager par ${l}`}
+              style={styles.shareItem}
+            >
+              <>
+                <View style={[styles.shareDisc, { backgroundColor: toneLight(tone, kit) }]}>
+                  <Icon source={ic} size={24} color={toneColor(tone, kit)} />
+                </View>
+                <Text style={[font('400', 12), { color: kit.textPrimary }]}>{l}</Text>
+              </>
+            </TouchableRipple>
+          ))}
+        </View>
+      </KitBottomSheet>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  section: { gap: space.s2 },
-  content: { gap: space.s3 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.s1 },
-  number: { width: 28, textAlign: 'center', alignSelf: 'center', fontWeight: '700' },
-  moveButtons: { flexDirection: 'row' },
-  twoLists: { flexDirection: 'row', gap: space.s2 },
-  listColumn: { flex: 1, gap: space.s1 },
-  art: { height: 96, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.s2 },
-  gridItem: { width: '48%', minWidth: 130 },
-  gridContent: { minHeight: 116, alignItems: 'center', justifyContent: 'center', gap: space.s1 },
-  sheetBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#0007' },
-  sheet: { padding: space.s4, gap: space.s2, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl },
-  sheetHandle: {
-    alignSelf: 'center',
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#888',
-    marginBottom: space.s2,
+  fill: { flex: 1 },
+  start: { alignSelf: 'flex-start' },
+  mt4: { marginTop: 4 },
+  mt6: { marginTop: 6 },
+  reorderItem: { flexDirection: 'row', alignItems: 'center', gap: space.m, paddingLeft: space.m },
+  stepDot: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+  lanes: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  lane: { minHeight: 160, padding: space.s2, borderRadius: radius.md, borderWidth: 1.5, gap: space.s2 },
+  laneCard: { padding: space.s3, borderRadius: radius.md },
+  tile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.m,
+    paddingLeft: space.m,
+    paddingRight: space.s1,
+    minHeight: 72,
   },
-  virtualList: { maxHeight: 300, borderWidth: 1, borderColor: '#aab2c0', borderRadius: radius.md },
+  media: { height: 110 },
+  mediaText: { paddingHorizontal: space.m, paddingVertical: space.s3 },
+  actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: space.s2, padding: space.s2 },
+  overline: { letterSpacing: 0.8 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', margin: -4 },
+  gridTile: { aspectRatio: 1, padding: 4 },
+  gridInner: { flex: 1, borderRadius: radius.md, overflow: 'hidden' },
+  gridBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: space.m,
+    paddingVertical: 6,
+  },
+  sheetBox: { height: SHEET_BOX, overflow: 'hidden' },
+  inlineSheet: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+  },
+  grab: { height: 24, alignItems: 'center', justifyContent: 'center' },
+  grabber: { width: 32, height: 4, borderRadius: 2 },
+  sheetContent: { paddingHorizontal: space.s4, paddingBottom: space.s4 },
+  denseRow: { flexDirection: 'row', alignItems: 'center', gap: space.m, minHeight: 40 },
+  virtual: { height: VIRTUAL_HEIGHT },
+  virtualRow: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: ROW,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.m,
+    paddingHorizontal: space.m,
+  },
+  virtualIdx: { minWidth: 48 },
+  badgeCell: { justifyContent: 'center' },
+  rippleBox: { height: 90, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center' },
+  centerItems: { alignItems: 'center' },
+  rippleCircle: { width: 90, height: 90, borderRadius: 45, alignItems: 'center', justifyContent: 'center' },
+  unbounded: { height: 90, alignItems: 'center', justifyContent: 'center' },
+  unboundedHit: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
+  shareRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 20,
+    rowGap: 16,
+    paddingHorizontal: space.s4,
+    paddingBottom: space.s4,
+  },
+  shareItem: { alignItems: 'center', gap: 6 },
+  shareDisc: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
 });

@@ -8,7 +8,16 @@ import { MIN_TOUCH, elevation, font, radius, sizes, space, useKitTheme, withAlph
  * outline = contour neutre · ghost = texte · danger = warn · success · tertiary.
  */
 export type KitButtonVariant =
-  'primary' | 'raised' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'dangerOutline' | 'success' | 'tertiary';
+  | 'primary'
+  | 'raised'
+  | 'tonal'
+  | 'secondary'
+  | 'outline'
+  | 'ghost'
+  | 'danger'
+  | 'dangerOutline'
+  | 'success'
+  | 'tertiary';
 export type KitButtonSize = keyof typeof sizes.button;
 export type KitButtonShape = 'pill' | 'rounded';
 
@@ -51,6 +60,7 @@ export function KitButton({
   const spec: Record<KitButtonVariant, { bg?: string; fg: string; border?: string }> = {
     primary: { bg: kit.primary, fg: kit.onPrimary },
     raised: { bg: roles.surfaceContainerLow, fg: kit.primary },
+    tonal: { bg: roles.secondaryContainer, fg: roles.onSecondaryContainer },
     secondary: { fg: kit.primary, border: roles.outlineVariant },
     outline: { fg: kit.textPrimary, border: roles.outlineVariant },
     ghost: { fg: kit.primary },

@@ -396,11 +396,11 @@ export default function CategoryPage() {
   if (cat.id === 'typography') return <TypographyGallery key={section} initialSection={section} />;
   if (cat.id === 'forms') return <FormsGallery key={section} initialSection={section} />;
   if (cat.id === 'buttons') return <ButtonsGallery key={section} initialSection={section} />;
-  if (cat.id === 'planning') return <PlanningGallery />;
+  if (cat.id === 'planning') return <PlanningGallery key={section} initialSection={section} />;
   if (cat.id === 'media') return <MediaGallery />;
   if (cat.id === 'maps') return <MapsGallery />;
-  if (cat.id === 'interactions') return <InteractionsGallery />;
-  if (cat.id === 'material') return <MaterialGallery />;
+  if (cat.id === 'interactions') return <InteractionsGallery key={section} initialSection={section} />;
+  if (cat.id === 'material') return <MaterialGallery key={section} initialSection={section} />;
   if (cat.id === 'layout') return <LayoutGallery />;
   if (cat.id === 'navigation') return <NavigationGallery key={section} initialSection={section} />;
   if (cat.id === 'fields') return <FieldsGallery key={section} initialSection={section} />;

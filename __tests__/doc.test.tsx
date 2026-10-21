@@ -12,11 +12,16 @@ import { NavigationGallery } from '../src/showcase/NavigationGallery';
 import { FeedbackGallery } from '../src/showcase/FeedbackGallery';
 import { FieldsGallery } from '../src/showcase/FieldsGallery';
 import { FormsGallery } from '../src/showcase/FormsGallery';
+import { InteractionsGallery } from '../src/showcase/InteractionsGallery';
+import { MaterialGallery } from '../src/showcase/MaterialGallery';
+import { PlanningGallery } from '../src/showcase/PlanningGallery';
 import { Demo, DocPage } from '../src/showcase/doc';
 import { categoryById } from '../src/showcase/kitNav';
 import { TypographyGallery } from '../src/showcase/TypographyGallery';
 import { useThemeStore } from '../src/store/themeStore';
 import { KitThemeProvider } from '../src/theme/KitThemeProvider';
+
+jest.mock('expo-router', () => ({ router: { navigate: jest.fn() } }));
 
 const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 0, left: 0, right: 0, bottom: 0 } };
 
@@ -88,6 +93,9 @@ describe.each([
   ['feedback', FeedbackGallery],
   ['navigation', NavigationGallery],
   ['data', DataGallery],
+  ['planning', PlanningGallery],
+  ['interactions', InteractionsGallery],
+  ['material', MaterialGallery],
 ] as const)('galerie %s', (id, Gallery) => {
   it.each(['light', 'dark'] as const)('mêmes sections que le catalogue Flutter (%s)', async (mode) => {
     useThemeStore.setState({ mode });

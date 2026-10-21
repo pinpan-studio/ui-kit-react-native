@@ -587,6 +587,8 @@ export function BarcodeBlock({ data, width = 240, height = 80 }: { data: string;
 
 // ── Ligne à balayer ────────────────────────────────────────────────
 
+const BOTH_SWIPES: ('archive' | 'delete')[] = ['archive', 'delete'];
+
 /**
  * Ligne qui se balaie pour archiver (vers la droite) ou supprimer (vers la gauche) — `Dismissible` Flutter.
  * Les deux gestes sont aussi proposés comme actions de lecteur d'écran.
@@ -594,9 +596,12 @@ export function BarcodeBlock({ data, width = 240, height = 80 }: { data: string;
 export function SwipeRow({
   children,
   onDismiss,
+  allow = BOTH_SWIPES,
 }: {
   children: ReactNode;
   onDismiss: (direction: 'archive' | 'delete') => void;
+  /** Sens autorisés : `archive` (vers la droite) et / ou `delete` (vers la gauche). */
+  allow?: ('archive' | 'delete')[];
 }) {
   const { kit } = useKitTheme();
   const [x] = useState(() => new Animated.Value(0));
@@ -607,12 +612,13 @@ export function SwipeRow({
       PanResponder.create({
         onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 12 && Math.abs(g.dx) > Math.abs(g.dy) * 2,
         onPanResponderMove: (_, g) => {
-          x.setValue(g.dx);
-          setDir(g.dx >= 0 ? 'archive' : 'delete');
+          const d = g.dx >= 0 ? 'archive' : 'delete';
+          x.setValue(allow.includes(d) ? g.dx : 0);
+          setDir(d);
         },
         onPanResponderRelease: (_, g) => {
-          if (Math.abs(g.dx) > 120 || Math.abs(g.vx) > 0.8) {
-            const d = g.dx > 0 ? 'archive' : 'delete';
+          const d = g.dx > 0 ? 'archive' : 'delete';
+          if (allow.includes(d) && (Math.abs(g.dx) > 120 || Math.abs(g.vx) > 0.8)) {
             Animated.timing(x, {
               toValue: d === 'archive' ? width : -width,
               duration: 180,
@@ -622,7 +628,7 @@ export function SwipeRow({
         },
         onPanResponderTerminate: () => Animated.spring(x, { toValue: 0, useNativeDriver: true }).start(),
       }),
-    [x, width, onDismiss],
+    [x, width, onDismiss, allow],
   );
   const archive = dir === 'archive';
   return (
@@ -631,7 +637,7 @@ export function SwipeRow({
       accessibilityActions={[
         { name: 'archive', label: 'Archiver' },
         { name: 'delete', label: 'Supprimer' },
-      ]}
+      ].filter((a) => allow.includes(a.name as 'archive' | 'delete'))}
       onAccessibilityAction={(e) => onDismiss(e.nativeEvent.actionName === 'archive' ? 'archive' : 'delete')}
     >
       <View

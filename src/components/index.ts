@@ -24,6 +24,8 @@ export {
   type ViewMode,
 } from './core/Toggles';
 export { MarkdownView, markdownInline } from './display/MarkdownView';
+export { DemoArt } from './display/DemoArt';
+export { ExpansionTile, TreeView } from './display/Disclosure';
 export { KitSlider } from './inputs/Slider';
 export { FormFieldLabel, KitSearchBar, KitTextField, maskFormat, type KitTextFieldProps } from './inputs/TextField';
 export {
@@ -126,3 +128,30 @@ export {
   type StepSpec,
   type TabSpec,
 } from './navigation/Navigation';
+export { DragArea, Draggable, DropTarget } from './interaction/DragDrop';
+export {
+  CommandPalette,
+  GestureArea,
+  KeyCap,
+  LongPressMenu,
+  NotificationCenter,
+  Popover,
+  ReorderList,
+  Tour,
+  fuzzyScore,
+  type MenuEntry,
+  type PaletteCommand,
+  type TourStep,
+} from './interaction/Interaction';
+export {
+  AgendaView,
+  GanttTimeline,
+  GroupedBoard,
+  KanbanBoard,
+  MonthCalendar,
+  NoteGrid,
+  PlanningCard,
+  PlanningItemSheet,
+  PlanningToolbar,
+} from './planning/Planning';
+export * from './planning/models';

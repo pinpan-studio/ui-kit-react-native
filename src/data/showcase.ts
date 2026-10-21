@@ -424,3 +424,43 @@ export const DEMO_MENU: MenuEntry[] = [
     m('group-list', 'Groupes', 'mi:group'),
   ]),
 ];
+
+/** Explorateur de fichiers (arbre déroulant). */
+export const FILES_TREE: TreeNodeData[] = [
+  {
+    id: 'src',
+    label: 'src',
+    children: [
+      {
+        id: 'app',
+        label: 'app',
+        children: [
+          {
+            id: 'core',
+            label: 'core',
+            children: [{ id: 'theme', label: 'theme_controller.dart', icon: 'mi:code', meta: '2 Ko' }],
+          },
+          {
+            id: 'shared',
+            label: 'shared',
+            children: [
+              { id: 'badge', label: 'status_badge.dart', icon: 'mi:code', meta: '1 Ko' },
+              { id: 'empty', label: 'empty_state.dart', icon: 'mi:code', meta: '2 Ko' },
+            ],
+          },
+          { id: 'main', label: 'main.dart', icon: 'mi:code', meta: '1 Ko' },
+        ],
+      },
+      {
+        id: 'assets',
+        label: 'assets',
+        children: [
+          { id: 'logo', label: 'logo.png', icon: 'mi:image', meta: '24 Ko' },
+          { id: 'bg', label: 'bg.jpg', icon: 'mi:image', meta: '310 Ko' },
+        ],
+      },
+    ],
+  },
+  { id: 'readme', label: 'README.md', icon: 'mi:description', meta: '3 Ko' },
+  { id: 'pubspec', label: 'pubspec.yaml', icon: 'mi:settings', meta: '2 Ko' },
+];
