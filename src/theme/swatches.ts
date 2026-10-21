@@ -51,3 +51,19 @@ export const ART_PALETTES = [
 
 /** Bitume de la route des scènes `DemoArt`. */
 export const ART_ROAD = '#1f2937';
+
+/** Page de document « papier » (aperçu PDF) : fond, encre, texte atténué, en-tête de tableau, lignes. */
+export const PAPER = {
+  bg: '#ffffff',
+  ink: '#1f2937',
+  muted: '#6b7280',
+  brand: '#006a6a',
+  header: '#f1f5f9',
+  line: '#e5e7eb',
+} as const;
+
+/** Fond de la visionneuse PDF, autour des pages. */
+export const PDF_BACKDROP = { light: '#525659', dark: '#0b0f12' } as const;
+
+/** Bouton de lecture de la façade YouTube. */
+export const YOUTUBE_RED = '#ff0000';

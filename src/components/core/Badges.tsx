@@ -18,11 +18,14 @@ export function StatusBadge({
   const { kit } = useKitTheme();
   const color = toneText(tone, kit);
   return (
-    <View style={[styles.badge, { backgroundColor: toneLight(tone, kit) }]}>
-      {icon ? <Icon source={icon} size={14} color={color} /> : null}
-      <Text numberOfLines={1} style={[styles.badgeText, { color }]}>
-        {uppercase ? label.toUpperCase() : label}
-      </Text>
+    // Rangée enveloppe : taille intrinsèque en colonne, centrée verticalement dans une rangée.
+    <View style={styles.badgeWrap}>
+      <View style={[styles.badge, { backgroundColor: toneLight(tone, kit) }]}>
+        {icon ? <Icon source={icon} size={14} color={color} /> : null}
+        <Text numberOfLines={1} style={[styles.badgeText, { color }]}>
+          {uppercase ? label.toUpperCase() : label}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -39,10 +42,11 @@ export function CountDot({ count, tone = 'error' }: { count: number; tone?: KitT
 }
 
 const styles = StyleSheet.create({
+  badgeWrap: { flexDirection: 'row', flexShrink: 1 },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
+    flexShrink: 1,
     gap: space.s1,
     paddingHorizontal: space.s3,
     paddingVertical: space.s1,

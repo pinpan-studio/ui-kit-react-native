@@ -1,358 +1,262 @@
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Button, Card, Chip, IconButton, List, SegmentedButtons, Text } from 'react-native-paper';
+import { useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Icon } from 'react-native-paper';
 
-import { Page } from '../shell/Page';
-import { radius, space } from '../theme/tokens';
-import { useKitTheme } from '../theme/useKitTheme';
+import {
+  BASEMAPS,
+  BASEMAP_IDS,
+  KitChip,
+  KitMap,
+  MapStatePlaceholder,
+  SegmentedToggle,
+  StatusBadge,
+  shapeLabel,
+  type Basemap,
+  type DrawnShape,
+  type KitMapHandle,
+} from '../components';
+import { FLOTTE, FLOTTE_LEGEND, POSITIONS_DENSES, TRAJETS, TRAJET_ETAPES, ZONES, ZONE_MARKERS } from '../data/map';
+import { font, radius, space, toneColor, useKitTheme } from '../theme';
+import { Demo, DocPage, Gap, type DocSection } from './doc';
 
-const fleet = [
-  { id: 'CI-4521-AB', label: 'Toyota Hilux', status: 'En mouvement', color: 'success', x: 25, y: 32 },
-  { id: 'CI-2087-CD', label: 'Isuzu D-Max', status: 'À l’arrêt', color: 'warning', x: 69, y: 25 },
-  { id: 'CI-7734-EF', label: 'Hyundai H1', status: 'Maintenance', color: 'info', x: 55, y: 68 },
-  { id: 'CI-0418-GH', label: 'Mitsubishi L200', status: 'Alerte', color: 'error', x: 82, y: 65 },
-] as const;
+const SHAPE_ICON = { marker: 'mi:place', line: 'mi:timeline', polygon: 'pentagon-outline' } as const;
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.section}>
-      <Text variant="titleMedium" accessibilityRole="header">
-        {title}
-      </Text>
-      <Card mode="outlined">
-        <Card.Content style={styles.content}>{children}</Card.Content>
-      </Card>
-    </View>
-  );
-}
+/** `/components/maps` — KitMap : fonds gratuits, marqueurs, regroupement, trajets, zones, dessin, carte compacte, états. */
+export function MapsGallery({ initialSection }: { initialSection?: string }) {
+  const { kit } = useKitTheme();
+  const fleet = useRef<KitMapHandle>(null);
+  const [basemap, setBasemap] = useState<Basemap>('streets');
+  const [selected, setSelected] = useState<string | null>(null);
+  const [shapes, setShapes] = useState<DrawnShape[]>([]);
+  const [state, setState] = useState<'loading' | 'empty' | 'error'>('loading');
+  const first = FLOTTE[0]!;
 
-export function MapsGallery() {
-  const theme = useKitTheme();
-  const [basemap, setBasemap] = useState('Rues');
-  const [selected, setSelected] = useState<string>(fleet[0].id);
-  const [zoom, setZoom] = useState(1);
-  const [shapeCount, setShapeCount] = useState(0);
-  const [drawTool, setDrawTool] = useState('point');
-  const [mapState, setMapState] = useState('loading');
-  const selectedVehicle = fleet.find((vehicle) => vehicle.id === selected) ?? fleet[0];
-
-  return (
-    <Page testID="category-maps">
-      <Text variant="titleLarge" accessibilityRole="header">
-        Cartes
-      </Text>
-      <Text variant="bodyLarge">
-        Exemples cartographiques locaux : fonds illustrés, flotte, trajets, zones, dessin et états.
-      </Text>
-
-      <Section title="Fonds de carte">
-        <View style={styles.row}>
-          {['Gris', 'Rues', 'Topo', 'Satellite', 'OSM'].map((item) => (
-            <Chip key={item} selected={basemap === item} onPress={() => setBasemap(item)}>
-              {item}
-            </Chip>
-          ))}
-        </View>
-        <MapPanel theme={theme} mode={basemap} zoom={zoom} markers={fleet} selected={selected} onSelect={setSelected} />
-        <Text variant="bodySmall">Fond actif : {basemap} · exemple schématique local</Text>
-      </Section>
-
-      <Section title="Marqueurs">
-        <MapPanel theme={theme} mode="Rues" zoom={zoom} markers={fleet} selected={selected} onSelect={setSelected} />
-        <View style={styles.row}>
-          {fleet.map((item) => (
-            <Chip key={item.id} selected={item.id === selected} icon="map-marker" onPress={() => setSelected(item.id)}>
-              {item.id}
-            </Chip>
-          ))}
-        </View>
-        <List.Item
-          title={`${selectedVehicle.id} · ${selectedVehicle.label}`}
-          description={`${selectedVehicle.status} · Plateau, Abidjan · il y a 12 s`}
-          left={(p) => <List.Icon {...p} icon="car-outline" />}
-          right={() => <Chip>{selectedVehicle.status}</Chip>}
-        />
-      </Section>
-
-      <Section title="Clustering">
-        <Text variant="bodyMedium">420 balises regroupées par zone. Touchez la bulle pour zoomer dans le groupe.</Text>
-        <MapPanel theme={theme} mode="Rues" zoom={zoom} clustered onZoom={() => setZoom(Math.min(2, zoom + 0.25))} />
-        <View style={styles.row}>
-          <Button icon="minus" onPress={() => setZoom(Math.max(0.75, zoom - 0.25))}>
-            Dézoomer
-          </Button>
-          <Text>Zoom {Math.round(zoom * 100)} %</Text>
-          <Button icon="plus" onPress={() => setZoom(Math.min(2, zoom + 0.25))}>
-            Zoomer
-          </Button>
-        </View>
-      </Section>
-
-      <Section title="Trajets">
-        <MapPanel theme={theme} mode="Rues" zoom={1} route selected={selected} markers={fleet.slice(0, 2)} />
-        <View style={styles.row}>
-          <Chip icon="circle">Trajet réalisé · 18,4 km</Chip>
-          <Chip icon="circle-outline">Itinéraire prévu · 16,9 km</Chip>
-        </View>
-        <Text variant="bodySmall">Départ · Plateau, Abidjan → Arrivée · Cocody · durée 42 min</Text>
-      </Section>
-
-      <Section title="Zones / géofences">
-        <MapPanel theme={theme} mode="Rues" zoom={1} zones />
-        <List.Item
-          title="Dépôt de Vridi"
-          description="Zone de service · rayon 500 m"
-          left={(p) => <List.Icon {...p} icon="map-marker-radius-outline" />}
-          right={() => <Chip icon="check-circle">Active</Chip>}
-        />
-        <List.Item
-          title="Port autonome"
-          description="Zone restreinte · polygone"
-          left={(p) => <List.Icon {...p} icon="pentagon-outline" />}
-          right={() => <Chip icon="alert">Restreinte</Chip>}
-        />
-      </Section>
-
-      <Section title="Dessin">
-        <SegmentedButtons
-          value={drawTool}
-          onValueChange={setDrawTool}
-          buttons={[
-            { value: 'point', label: 'Point', icon: 'map-marker' },
-            { value: 'line', label: 'Ligne', icon: 'chart-timeline-variant' },
-            { value: 'area', label: 'Zone', icon: 'vector-polygon' },
-          ]}
-        />
-        <MapPanel
-          theme={theme}
-          mode="Rues"
-          zoom={1}
-          drawing={shapeCount > 0}
-          onSelect={() => setShapeCount(shapeCount + 1)}
-        />
-        <View style={styles.row}>
-          <Button icon="plus" mode="contained" onPress={() => setShapeCount(shapeCount + 1)}>
-            Ajouter un {drawTool === 'point' ? 'point' : drawTool === 'line' ? 'sommet' : 'sommet de zone'}
-          </Button>
-          <Button icon="undo" onPress={() => setShapeCount(Math.max(0, shapeCount - 1))}>
-            Annuler
-          </Button>
-          <Button icon="check" onPress={() => setShapeCount(0)}>
-            Terminer
-          </Button>
-        </View>
-        <Text variant="bodySmall">
-          {shapeCount ? `${shapeCount} point(s) dans le tracé` : 'Touchez la carte pour placer un point.'}
-        </Text>
-      </Section>
-
-      <Section title="Carte compacte">
-        <MapPanel theme={theme} mode="Rues" zoom={1} compact markers={[fleet[0]]} selected={fleet[0].id} />
-        <List.Item
-          title="CI-4521-AB · Toyota Hilux"
-          description="Plateau, bd de la République · il y a 12 s"
-          left={(p) => <List.Icon {...p} icon="truck-outline" />}
-          right={() => <Chip icon="speedometer">54 km/h</Chip>}
-        />
-      </Section>
-
-      <Section title="États">
-        <SegmentedButtons
-          value={mapState}
-          onValueChange={setMapState}
-          buttons={[
-            { value: 'loading', label: 'Chargement' },
-            { value: 'empty', label: 'Vide' },
-            { value: 'error', label: 'Erreur' },
-          ]}
-        />
-        <View style={[styles.stateBox, { backgroundColor: theme.colors.surfaceVariant }]}>
-          <IconButton
-            icon={
-              mapState === 'loading'
-                ? 'map-clock-outline'
-                : mapState === 'empty'
-                  ? 'map-marker-off-outline'
-                  : 'alert-circle-outline'
-            }
-            size={32}
-            accessibilityLabel={`État : ${mapState}`}
+  const sections: DocSection[] = [
+    {
+      id: 'basemaps',
+      title: 'Fonds de carte',
+      source: 'Basemap (Esri Canvas, Rues, Topo, Satellite, OpenStreetMap)',
+      description:
+        'Par défaut, gris clair ou gris foncé selon le thème. Le bouton « calques » de la carte permet aussi de changer de fond.',
+      children: (
+        <Demo label="Sélecteur de fond" flush>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+            {BASEMAP_IDS.map((b) => (
+              <KitChip
+                key={b}
+                label={BASEMAPS[b].label}
+                icon={BASEMAPS[b].icon}
+                selected={basemap === b}
+                onPress={() => setBasemap(b)}
+              />
+            ))}
+          </ScrollView>
+          <KitMap key={basemap} basemap={basemap} height={260} radius={0} zoom={13} showBasemapSwitcher={false} />
+        </Demo>
+      ),
+    },
+    {
+      id: 'markers',
+      title: 'Marqueurs',
+      source: 'MapMarkerData · FlatMarker',
+      description:
+        'Disque teinté avec icône, halo pulsé pour les véhicules en mouvement, flèche de cap. Touchez un marqueur : popup en carte flottante ; la liste sous la carte centre le véhicule.',
+      children: (
+        <Demo label="Flotte en temps réel" flush>
+          <KitMap ref={fleet} height={320} radius={0} markers={FLOTTE} fitToContent legend={FLOTTE_LEGEND} />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsWide}>
+            {FLOTTE.map((m) => (
+              <KitChip
+                key={m.id}
+                label={m.tooltip ?? m.id}
+                icon={m.icon}
+                selected={selected === m.id}
+                onPress={() => {
+                  setSelected(m.id);
+                  fleet.current?.flyTo(m.point, 15);
+                }}
+              />
+            ))}
+          </ScrollView>
+        </Demo>
+      ),
+    },
+    {
+      id: 'cluster',
+      title: 'Clustering',
+      source: 'KitMap cluster',
+      description:
+        '420 balises réparties en Côte d’Ivoire. Les bulles se divisent en zoomant ; leur couleur reflète l’état le plus critique. Touchez une bulle pour zoomer.',
+      children: (
+        <Demo label="Parc de balises" flush>
+          <KitMap
+            height={340}
+            radius={0}
+            markers={POSITIONS_DENSES}
+            cluster
+            zoom={6.4}
+            center={{ lat: 7.4, lng: -5.5 }}
           />
-          <Text variant="titleSmall">
-            {mapState === 'loading'
-              ? 'Chargement des positions…'
-              : mapState === 'empty'
-                ? 'Aucun véhicule dans cette zone'
-                : 'Carte indisponible'}
-          </Text>
-          <Text variant="bodySmall">
-            {mapState === 'loading'
-              ? 'Dernière actualisation il y a 12 s'
-              : mapState === 'empty'
-                ? 'Modifiez la zone ou les filtres.'
-                : 'Vérifiez la connexion puis réessayez.'}
-          </Text>
-          {mapState === 'error' ? <Button onPress={() => setMapState('loading')}>Réessayer</Button> : null}
-        </View>
-      </Section>
-    </Page>
-  );
-}
+        </Demo>
+      ),
+    },
+    {
+      id: 'routes',
+      title: 'Trajets',
+      source: 'MapRouteData (plein, pointillé, départ / arrivée)',
+      children: (
+        <Demo label="Trajet réalisé vs prévu" flush>
+          <KitMap height={300} radius={0} routes={TRAJETS} markers={TRAJET_ETAPES} fitToContent />
+          <View style={styles.routeLegend}>
+            {TRAJETS.map((r) => (
+              <View key={r.id} style={styles.routeItem}>
+                <View style={[styles.routeSwatch, { backgroundColor: toneColor(r.tone ?? 'primary', kit) }]} />
+                <Text style={[font('400', 12), styles.shrink, { color: kit.textSecondary }]}>{r.label}</Text>
+              </View>
+            ))}
+          </View>
+        </Demo>
+      ),
+    },
+    {
+      id: 'zones',
+      title: 'Zones / géofences',
+      source: 'MapZoneData (cercle en mètres, polygone)',
+      children: (
+        <Demo label="Géofences" flush>
+          <KitMap height={300} radius={0} zones={ZONES} markers={ZONE_MARKERS} fitToContent />
+          {ZONES.map((z) => {
+            const restricted = z.tone === 'error';
+            return (
+              <View key={z.id} style={styles.zoneRow}>
+                <Icon
+                  source={z.center ? 'mi:radio-button-checked' : 'pentagon-outline'}
+                  size={24}
+                  color={toneColor(z.tone ?? 'primary', kit)}
+                />
+                <Text numberOfLines={1} style={[font('500', 13), styles.fill, { color: kit.textPrimary }]}>
+                  {z.label}
+                </Text>
+                <StatusBadge label={restricted ? 'Restreinte' : 'Active'} tone={restricted ? 'error' : 'success'} />
+              </View>
+            );
+          })}
+        </Demo>
+      ),
+    },
+    {
+      id: 'draw',
+      title: 'Dessin',
+      source: 'KitMap drawTools — équivalent Leaflet Draw / Geoman',
+      description:
+        'Choisissez un outil (point, ligne, zone) puis touchez la carte ; « Terminer » ferme la forme, ↶ annule le dernier sommet.',
+      children: (
+        <Demo label="Éditeur de zones" flush>
+          <KitMap
+            height={340}
+            radius={0}
+            zoom={13}
+            drawTools={['marker', 'line', 'polygon']}
+            onShapesChanged={setShapes}
+          />
+          <View style={styles.shapes}>
+            {shapes.length ? (
+              shapes.map((s, i) => <KitChip key={i} label={shapeLabel(s)} icon={SHAPE_ICON[s.tool]} />)
+            ) : (
+              <Text style={[font('400', 12.5), { color: kit.textMuted }]}>Aucune forme dessinée.</Text>
+            )}
+          </View>
+        </Demo>
+      ),
+    },
+    {
+      id: 'compact',
+      title: 'Carte compacte',
+      source: 'KitMap interactive={false}',
+      description: 'Vignette non interactive pour une fiche (position du véhicule, adresse d’un client).',
+      cols: 2,
+      children: [
+        <Demo key="vehicle" label="Fiche véhicule" flush>
+          <KitMap
+            height={150}
+            radius={0}
+            interactive={false}
+            showZoom={false}
+            showBasemapSwitcher={false}
+            zoom={15}
+            center={first.point}
+            markers={[first]}
+          />
+          <View style={styles.tile}>
+            <Icon source="mi:local-shipping" size={24} color={kit.textSecondary} />
+            <View style={styles.fill}>
+              <Text style={[font('500', 14), { color: kit.textPrimary }]}>CI-4521-AB · Toyota Hilux</Text>
+              <Text style={[font('400', 12.5), { color: kit.textSecondary }]}>
+                Plateau, bd de la République · il y a 12 s
+              </Text>
+            </View>
+            <StatusBadge label="54 km/h" tone="success" uppercase={false} />
+          </View>
+        </Demo>,
+        <Demo key="address" label="Adresse client" flush>
+          <KitMap
+            height={200}
+            radius={0}
+            interactive={false}
+            showZoom={false}
+            showBasemapSwitcher={false}
+            zoom={14}
+            center={ZONE_MARKERS[0]!.point}
+            markers={ZONE_MARKERS}
+          />
+        </Demo>,
+      ],
+    },
+    {
+      id: 'states',
+      title: 'États',
+      source: 'MapStatePlaceholder',
+      children: (
+        <Demo label="Chargement · vide · erreur">
+          <Gap>
+            <SegmentedToggle
+              expand
+              value={state}
+              onChange={setState}
+              options={[
+                { value: 'loading', label: 'Chargement' },
+                { value: 'empty', label: 'Vide' },
+                { value: 'error', label: 'Erreur' },
+              ]}
+            />
+            <MapStatePlaceholder kind={state} />
+          </Gap>
+        </Demo>
+      ),
+    },
+  ];
 
-function MapPanel({
-  theme,
-  mode,
-  zoom,
-  markers = [],
-  selected,
-  clustered = false,
-  route = false,
-  zones = false,
-  drawing = false,
-  compact = false,
-  onSelect,
-  onZoom,
-}: {
-  theme: ReturnType<typeof useKitTheme>;
-  mode: string;
-  zoom: number;
-  markers?: readonly {
-    id: string;
-    label: string;
-    status: string;
-    color: 'success' | 'warning' | 'info' | 'error';
-    x: number;
-    y: number;
-  }[];
-  selected?: string;
-  clustered?: boolean;
-  route?: boolean;
-  zones?: boolean;
-  drawing?: boolean;
-  compact?: boolean;
-  onSelect?: (id: string) => void;
-  onZoom?: () => void;
-}) {
-  const tint =
-    mode === 'Satellite'
-      ? theme.colors.tertiaryContainer
-      : mode === 'Topo'
-        ? theme.colors.secondaryContainer
-        : theme.colors.surfaceVariant;
   return (
-    <View
-      accessibilityLabel="Carte schématique locale"
-      style={[styles.map, { height: compact ? 150 : 220, backgroundColor: tint }]}
-    >
-      <View style={[styles.road, styles.roadA, { backgroundColor: theme.colors.surface }]} />
-      <View style={[styles.road, styles.roadB, { backgroundColor: theme.colors.surface }]} />
-      <View style={[styles.road, styles.roadC, { backgroundColor: theme.colors.surface }]} />
-      {zones ? (
-        <>
-          <View
-            style={[styles.zone, { borderColor: theme.colors.primary, backgroundColor: theme.colors.primaryContainer }]}
-          />
-          <View
-            style={[
-              styles.zone,
-              styles.zoneDanger,
-              { borderColor: theme.colors.error, backgroundColor: theme.colors.errorContainer },
-            ]}
-          />
-        </>
-      ) : null}
-      {route ? <View style={[styles.route, { borderColor: theme.colors.primary }]} /> : null}
-      {clustered ? (
-        <>
-          <View style={[styles.cluster, { left: '25%', top: '31%', backgroundColor: theme.colors.primary }]}>
-            <Text style={styles.clusterText}>128</Text>
-          </View>
-          <View style={[styles.cluster, { left: '57%', top: '49%', backgroundColor: theme.colors.error }]}>
-            <Text style={styles.clusterText}>64</Text>
-          </View>
-          <View style={[styles.cluster, { left: '71%', top: '23%', backgroundColor: theme.colors.tertiary }]}>
-            <Text style={styles.clusterText}>42</Text>
-          </View>
-        </>
-      ) : (
-        markers.map((marker) => (
-          <Chip
-            key={marker.id}
-            compact
-            icon="map-marker"
-            onPress={() => onSelect?.(marker.id)}
-            style={[
-              styles.marker,
-              {
-                left: `${marker.x * zoom}%`,
-                top: `${marker.y * zoom}%`,
-                backgroundColor: marker.color === 'error' ? theme.colors.error : theme.kit[marker.color],
-              },
-            ]}
-            textStyle={{ color: '#ffffff' }}
-          >
-            {marker.id.split('-')[1]}
-          </Chip>
-        ))
-      )}
-      {drawing ? (
-        <View style={[styles.drawPoint, { left: '45%', top: '53%', backgroundColor: theme.colors.error }]} />
-      ) : null}
-      {clustered ? (
-        <IconButton icon="plus" style={styles.zoomButton} accessibilityLabel="Zoomer sur le groupe" onPress={onZoom} />
-      ) : null}
-    </View>
+    <DocPage
+      title="Cartes"
+      icon="mi:map"
+      initialSection={initialSection}
+      testID="category-maps"
+      subtitle="Composant KitMap sans dépendance native : fonds de carte libres sans clé d’API (seules les tuiles sont téléchargées), marqueurs flat, clustering, trajets, zones, dessin au doigt. Contrôles et popups suivent le thème clair / sombre."
+      sections={sections}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  section: { gap: space.s2 },
-  content: { gap: space.s3 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.s1 },
-  map: { borderRadius: radius.lg, overflow: 'hidden', position: 'relative' },
-  road: { position: 'absolute', borderRadius: 12 },
-  roadA: { left: '-10%', top: '41%', width: '120%', height: 18, transform: [{ rotate: '-17deg' }] },
-  roadB: { left: '15%', top: '-15%', width: 15, height: '140%', transform: [{ rotate: '23deg' }] },
-  roadC: { left: '70%', top: '-12%', width: 12, height: '130%', transform: [{ rotate: '-29deg' }] },
-  zone: {
-    position: 'absolute',
-    left: '13%',
-    top: '19%',
-    width: '40%',
-    height: '62%',
-    borderWidth: 2,
-    borderRadius: 58,
-    opacity: 0.75,
-  },
-  zoneDanger: { left: '52%', top: '31%', width: '32%', height: '43%', borderStyle: 'dashed' },
-  route: {
-    position: 'absolute',
-    left: '21%',
-    top: '25%',
-    width: '58%',
-    height: '49%',
-    borderWidth: 4,
-    borderRadius: 75,
-    borderStyle: 'dashed',
-    transform: [{ rotate: '-18deg' }],
-  },
-  marker: { position: 'absolute', transform: [{ translateX: -22 }, { translateY: -18 }], minWidth: 44 },
-  cluster: {
-    position: 'absolute',
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  clusterText: { color: '#fff', fontWeight: '700' },
-  drawPoint: { position: 'absolute', width: 12, height: 12, borderRadius: 6 },
-  zoomButton: { position: 'absolute', right: 4, bottom: 4, backgroundColor: '#ffffff' },
-  stateBox: {
-    minHeight: 150,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: space.s3,
-  },
+  fill: { flex: 1 },
+  shrink: { flexShrink: 1 },
+  chips: { gap: space.s2, padding: space.s2 },
+  chipsWide: { gap: space.s2, padding: space.s3 },
+  routeLegend: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 16, rowGap: 6, padding: space.s3 },
+  routeItem: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
+  routeSwatch: { width: 22, height: 4, borderRadius: radius.full },
+  zoneRow: { flexDirection: 'row', alignItems: 'center', gap: space.m, minHeight: 48, paddingHorizontal: space.m },
+  shapes: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, padding: space.s3 },
+  tile: { flexDirection: 'row', alignItems: 'center', gap: space.m, padding: space.m },
 });

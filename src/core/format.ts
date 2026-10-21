@@ -130,3 +130,9 @@ const WEEKDAYS_LONG = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samed
 /** `mardi 14 octobre` */
 export const weekday = (d: Date): string =>
   `${WEEKDAYS_LONG[(d.getDay() + 6) % 7]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+
+/** Durée `m:ss` (millisecondes). */
+export function mmss(ms: number): string {
+  const s = Math.floor(ms / 1000);
+  return `${Math.floor(s / 60)}:${pad(s % 60)}`;
+}

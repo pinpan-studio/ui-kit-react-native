@@ -1,389 +1,456 @@
-import { useState } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import { Button, Card, Chip, Divider, List, SegmentedButtons, Text } from 'react-native-paper';
+import { useState, type ReactNode } from 'react';
+import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { FAB, Icon } from 'react-native-paper';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
-import { Page } from '../shell/Page';
-import { radius, space } from '../theme/tokens';
-import { useKitTheme } from '../theme/useKitTheme';
+import {
+  KitAppBar,
+  KitAvatar,
+  KitButton,
+  KitCard,
+  KitChart,
+  KitIconButton,
+  KitNavigationBar,
+  KitNavigationRail,
+  KitSlider,
+  KpiCard,
+  PageHeader,
+  ResponsiveGrid,
+  SegmentedToggle,
+  StatusBadge,
+  type NavDestination,
+} from '../components';
+import { useKitSnack } from '../core/snack';
+import { CA_2026, DEMO_CLIENTS, MOIS, STATUT_LABEL, STATUT_TONE, TIMELINE_EVENTS } from '../data/showcase';
+import { breakpoints, columns, font, kitText, radius, space, toneColor, useKitTheme, withAlpha } from '../theme';
+import { WHITE } from '../theme/swatches';
+import { Demo, DocPage, Gap, type DocSection } from './doc';
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+/**
+ * Cadre d'appareil : rend son contenu à une largeur logique donnée puis le met à l'échelle de la place
+ * disponible, pour comparer téléphone et tablette sur un même écran.
+ */
+function DeviceFrame({ width, height = 420, children }: { width: number; height?: number; children: ReactNode }) {
+  const { kit } = useKitTheme();
+  const [avail, setAvail] = useState(0);
+  const outerW = width + 16;
+  const outerH = height + 16;
+  const scale = avail ? Math.max(0.2, Math.min(1, avail / outerW)) : 0;
   return (
-    <View style={styles.section}>
-      <Text variant="titleMedium" accessibilityRole="header">
-        {title}
-      </Text>
-      <Card mode="outlined">
-        <Card.Content style={styles.content}>{children}</Card.Content>
-      </Card>
-    </View>
-  );
-}
-function Block({ color, height = 58, label }: { color: string; height?: number; label?: string }) {
-  return (
-    <View style={[styles.block, { backgroundColor: color, minHeight: height }]}>
-      {label ? <Text variant="labelSmall">{label}</Text> : null}
-    </View>
-  );
-}
-
-export function LayoutGallery() {
-  const theme = useKitTheme();
-  const { width: deviceWidth } = useWindowDimensions();
-  const [frame, setFrame] = useState('phone');
-  const frameWidth = frame === 'phone' ? 375 : 820;
-  const columns = frameWidth < 600 ? 1 : frameWidth < 960 ? 2 : 3;
-  const [layout, setLayout] = useState('comfortable');
-  const palette = [theme.colors.primaryContainer, theme.colors.secondaryContainer, theme.colors.tertiaryContainer];
-
-  return (
-    <Page testID="category-layout">
-      <Text variant="titleLarge" accessibilityRole="header">
-        Layout
-      </Text>
-      <Text variant="bodyLarge">
-        Structures de page adaptatives : conteneurs, grilles, panneaux et points de rupture.
-      </Text>
-      <SegmentedButtons
-        value={frame}
-        onValueChange={setFrame}
-        buttons={[
-          { value: 'phone', label: 'Téléphone · 375 dp', icon: 'cellphone' },
-          { value: 'tablet', label: 'Tablette · 820 dp', icon: 'tablet' },
-        ]}
-      />
-      <Text variant="bodySmall">
-        Aperçu simulé · fenêtre courante : {Math.round(deviceWidth)} dp · largeur d’essai : {frameWidth} dp
-      </Text>
-
-      <Section title="Page layout">
-        <View style={[styles.appFrame, { borderColor: theme.colors.outlineVariant }]}>
-          <View style={[styles.appBar, { backgroundColor: theme.colors.surfaceVariant }]}>
-            <Text variant="titleMedium">☰　Clients</Text>
-            <Text>⌕　♧</Text>
+    <View onLayout={(e) => setAvail(e.nativeEvent.layout.width)} style={styles.frameHost}>
+      {scale ? (
+        <View style={{ width: outerW * scale, height: outerH * scale }}>
+          <View
+            style={[
+              styles.frame,
+              {
+                width: outerW,
+                height: outerH,
+                left: (outerW * scale - outerW) / 2,
+                top: (outerH * scale - outerH) / 2,
+                transform: [{ scale }],
+                backgroundColor: kit.textPrimary,
+              },
+            ]}
+          >
+            <View style={[styles.screen, { width, height, backgroundColor: kit.bg }]}>{children}</View>
           </View>
-          <View style={styles.pageContent}>
-            <Text variant="labelMedium">REGISTRE</Text>
-            <Text variant="headlineSmall">Clients</Text>
-            <Text variant="bodySmall">40 clients · 31 actifs</Text>
-            <View style={styles.row}>
-              <Button mode="outlined">Filtrer</Button>
-              {frame === 'tablet' ? (
-                <Button mode="contained" icon="plus">
-                  Nouveau client
-                </Button>
-              ) : null}
-            </View>
-            {['Transports Yao & Fils', 'Bolloré Logistics CI', 'SOTRA'].map((name, index) => (
-              <List.Item
-                key={name}
-                title={name}
-                description={`${24 - index * 5} véhicules · ${index ? 'Actif' : 'À jour'}`}
-                left={(p) => <List.Icon {...p} icon="domain" />}
-                right={() => <Chip compact>{index ? 'Actif' : 'Premium'}</Chip>}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/** Ligne libellé / valeur des fiches. */
+function Line({ k, v }: { k: string; v: string }) {
+  const { kit } = useKitTheme();
+  return (
+    <View style={styles.line}>
+      <Text style={[font('400', 12.5), styles.fill, { color: kit.textSecondary }]}>{k}</Text>
+      <Text style={[font('600', 13), styles.lineValue, { color: kit.textPrimary }]}>{v}</Text>
+    </View>
+  );
+}
+
+/** Colonne principale + latérale (ratio 2 : 1), empilées sous 600 dp. */
+function TwoCols({ main, side }: { main: ReactNode; side: ReactNode }) {
+  const [w, setW] = useState(0);
+  const stacked = w < breakpoints.md;
+  return (
+    <View onLayout={(e) => setW(e.nativeEvent.layout.width)} style={stacked ? styles.stack : styles.cols}>
+      <View style={stacked ? undefined : styles.flex2}>{main}</View>
+      <View style={stacked ? undefined : styles.fill}>{side}</View>
+    </View>
+  );
+}
+
+/** Bandeau en dégradé primaire → info. */
+function Banner({ children }: { children: ReactNode }) {
+  const { kit } = useKitTheme();
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  return (
+    <View
+      style={styles.banner}
+      onLayout={(e) => setSize({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+    >
+      {size.w ? (
+        <Svg width={size.w} height={size.h} style={styles.abs}>
+          <Defs>
+            <LinearGradient id="banner" x1="0" y1="0" x2="1" y2="0">
+              <Stop offset="0" stopColor={kit.primary} />
+              <Stop offset="1" stopColor={kit.info} />
+            </LinearGradient>
+          </Defs>
+          <Rect width={size.w} height={size.h} fill="url(#banner)" />
+        </Svg>
+      ) : null}
+      {children}
+    </View>
+  );
+}
+
+const NAV: NavDestination[] = [
+  { label: 'Accueil', icon: 'mi:dashboard' },
+  { label: 'Clients', icon: 'mi:people-outline', selectedIcon: 'mi:people' },
+  { label: 'Missions', icon: 'mi:build' },
+];
+
+const OFFERS: [string, string, string][] = [
+  ['Essentiel', '9 900 F', 'mi:gps-fixed'],
+  ['Standard', '14 500 F', 'mi:verified'],
+  ['Premium', '24 000 F', 'mi:workspace-premium'],
+];
+
+const BREAKPOINTS: [keyof typeof breakpoints, string][] = [
+  ['xs', 'Petits mobiles'],
+  ['sm', 'Mobiles standard'],
+  ['md', 'Grands mobiles — 2 colonnes'],
+  ['tablet', 'Tablette portrait — rail visible'],
+  ['lg', 'Tablette paysage — 3 colonnes'],
+  ['xl', 'Desktop'],
+];
+
+/** `/components/layout` — conteneur, tableau de bord, colonnes, barre latérale, pleine largeur, sections, responsive. */
+export function LayoutGallery({ initialSection }: { initialSection?: string }) {
+  const { kit } = useKitTheme();
+  const snack = useKitSnack();
+  const { width: screen } = useWindowDimensions();
+  const [device, setDevice] = useState<'phone' | 'tablet'>('phone');
+  const [resp, setResp] = useState(360);
+  const [nav, setNav] = useState(1);
+  const w = device === 'phone' ? 375 : 820;
+  const phone = device === 'phone';
+  const noop = () => snack.demoAction('Action');
+
+  const sections: DocSection[] = [
+    {
+      id: 'page',
+      title: 'Page layout',
+      source: 'KitAppBar + PageHeader + contenu défilant',
+      children: (
+        <Demo label="Page liste" muted>
+          <DeviceFrame width={w}>
+            <KitAppBar
+              leading={<KitIconButton icon="mi:menu" accessibilityLabel="Menu" onPress={noop} />}
+              title="Clients"
+              actions={<KitIconButton icon="mi:notifications-none" accessibilityLabel="Notifications" onPress={noop} />}
+            />
+            <ScrollView nestedScrollEnabled contentContainerStyle={styles.pad16}>
+              <PageHeader
+                breadcrumb="Registre"
+                title="Clients"
+                subtitle="40 clients · 31 actifs"
+                actions={phone ? undefined : <KitButton label="Nouveau client" icon="mi:add" onPress={noop} />}
               />
-            ))}
-          </View>
-          {frame === 'phone' ? (
-            <View style={[styles.bottomNav, { borderTopColor: theme.colors.outlineVariant }]}>
-              <Text>⌂　Accueil　　 ♙　Clients　　 ⚒　Missions</Text>
-            </View>
-          ) : null}
-        </View>
-      </Section>
-
-      <Section title="Dashboard layout">
-        <Text variant="titleMedium">Tableau de bord</Text>
-        <View style={styles.grid}>
-          {[
-            ['1 284', 'Clients'],
-            ['8 432', 'Véhicules'],
-            ['55,8 M', 'CA'],
-            ['17', 'Alertes'],
-          ].map(([value, label], index) => (
-            <View key={label} style={[styles.gridItem, { width: `${100 / Math.min(columns, 2) - 2}%` }]}>
-              <Card mode="contained" style={{ backgroundColor: palette[index % 3] }}>
-                <Card.Content style={styles.kpi}>
-                  <Text variant="headlineSmall">{value}</Text>
-                  <Text variant="bodySmall">{label}</Text>
-                </Card.Content>
-              </Card>
-            </View>
-          ))}
-        </View>
-        <View style={styles.row}>
-          <Card mode="outlined" style={styles.chart}>
-            <Card.Content>
-              <Text variant="labelLarge">Chiffre d’affaires</Text>
-              <ChartBars theme={theme} />
-            </Card.Content>
-          </Card>
-          {frame === 'tablet' ? (
-            <Card mode="outlined" style={styles.chart}>
-              <Card.Content>
-                <Text variant="labelLarge">Répartition</Text>
-                <View style={styles.donut}>
-                  <Text>60 %</Text>
-                </View>
-              </Card.Content>
-            </Card>
-          ) : null}
-        </View>
-      </Section>
-
-      <Section title="Two columns">
-        <View style={[styles.columns, frame === 'tablet' && styles.tabletColumns]}>
-          <Card mode="outlined" style={styles.mainColumn}>
-            <Card.Title title="Informations" left={(p) => <List.Icon {...p} icon="information-outline" />} />
-            <Card.Content>
-              <InfoLine label="Raison sociale" value="Transports Yao & Fils" />
-              <InfoLine label="Contact" value="Jean Kouassi" />
-              <InfoLine label="Ville" value="Abidjan" />
-              <InfoLine label="Véhicules" value="24" />
-            </Card.Content>
-          </Card>
-          <Card mode="outlined" style={styles.sideColumn}>
-            <Card.Title title="Activité" left={(p) => <List.Icon {...p} icon="history" />} />
-            <Card.Content>
-              <Text>Contrat renouvelé · Aujourd’hui</Text>
-              <Divider style={styles.divider} />
-              <Text>Intervention clôturée · Hier</Text>
-              <Divider style={styles.divider} />
-              <Text>Nouvelle facture · 18 oct.</Text>
-            </Card.Content>
-          </Card>
-        </View>
-      </Section>
-
-      <Section title="Three columns">
-        <View style={styles.grid}>
-          {[
-            ['Essentiel', '9 900 F', 'gps-fixed'],
-            ['Standard', '14 500 F', 'verified'],
-            ['Premium', '24 000 F', 'workspace-premium'],
-          ].map(([label, price, icon], index) => (
-            <View key={label} style={[styles.gridItem, { width: `${100 / columns - 2}%`, minWidth: 120 }]}>
-              <Card mode="outlined">
-                <Card.Content style={styles.content}>
-                  <Text variant="headlineSmall">{icon === 'gps-fixed' ? '⌖' : icon === 'verified' ? '✓' : '★'}</Text>
-                  <Text variant="titleMedium">{label}</Text>
-                  <Text>{price} / mois</Text>
-                  <Button mode="text">Choisir</Button>
-                </Card.Content>
-              </Card>
-            </View>
-          ))}
-        </View>
-      </Section>
-
-      <Section title="Sidebar layout">
-        <View
-          style={[
-            styles.appFrame,
-            {
-              minHeight: 220,
-              flexDirection: frame === 'tablet' ? 'row' : 'column',
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
-          {frame === 'tablet' ? (
-            <View style={[styles.rail, { backgroundColor: theme.colors.surfaceVariant }]}>
-              {['Accueil', 'Clients', 'Missions'].map((item, index) => (
-                <Chip
-                  key={item}
-                  selected={index === 1}
-                  icon={['view-dashboard-outline', 'account-group-outline', 'wrench-outline'][index]}
-                >
-                  {item}
-                </Chip>
-              ))}
-            </View>
-          ) : (
-            <View style={[styles.appBar, { backgroundColor: theme.colors.surfaceVariant }]}>
-              <Text>☰　Clients</Text>
-            </View>
-          )}
-          <View style={[styles.pageContent, { flex: 1, justifyContent: 'center' }]}>
-            <Text variant="titleMedium">Contenu principal</Text>
-            <Text>La navigation change avec la largeur disponible.</Text>
-            {frame === 'phone' ? (
-              <View style={styles.row}>
-                <Chip>⌂ Accueil</Chip>
-                <Chip selected>Clients</Chip>
-                <Chip>⚒ Missions</Chip>
+              <View style={styles.list}>
+                {DEMO_CLIENTS.slice(0, 5).map((x) => (
+                  <KitCard key={x.id} padding={space.s3}>
+                    <View style={styles.rowGap10}>
+                      <KitAvatar name={x.raisonSociale} size={34} />
+                      <Text numberOfLines={1} style={[font('400', 14), styles.fill, { color: kit.textPrimary }]}>
+                        {x.raisonSociale}
+                      </Text>
+                      <StatusBadge label={STATUT_LABEL[x.statut]} tone={STATUT_TONE[x.statut]} />
+                    </View>
+                  </KitCard>
+                ))}
               </View>
-            ) : null}
-          </View>
-        </View>
-      </Section>
-
-      <Section title="Pleine largeur">
-        <Text variant="bodyMedium">
-          Le contenu de lecture garde une largeur maximale; les tableaux et cartes peuvent s’étendre sur tout l’écran.
-        </Text>
-        <View style={[styles.contentWidth, { backgroundColor: theme.colors.surfaceVariant, alignSelf: 'center' }]}>
-          <Text variant="titleSmall">Contenu éditorial · largeur 680 dp max</Text>
-          <Text>Informations présentées dans une mesure confortable, même sur un écran large.</Text>
-        </View>
-        <Block color={theme.colors.primaryContainer} height={44} label="Tableau plein écran · 100 % de la largeur" />
-      </Section>
-
-      <Section title="Card sections">
-        <Card mode="outlined">
-          <Card.Title title="Informations client" subtitle="Données générales" />
-          <Card.Content>
-            <InfoLine label="Société" value="Transports Yao & Fils" />
-            <InfoLine label="Ville" value="Abidjan" />
-          </Card.Content>
-          <Card.Actions>
-            <Button>Modifier</Button>
-            <Button mode="contained-tonal">Voir la fiche</Button>
-          </Card.Actions>
-        </Card>
-        <Card mode="contained">
-          <Card.Content style={styles.content}>
-            <Text variant="titleMedium">Contrat Premium</Text>
-            <Text>24 véhicules · renouvellement le 28/02/2027</Text>
-            <Block color={theme.colors.primaryContainer} height={8} />
-            <Text variant="bodySmall">62 % de la période écoulée</Text>
-          </Card.Content>
-        </Card>
-      </Section>
-
-      <Section title="Conteneurs responsive">
-        <SegmentedButtons
-          value={layout}
-          onValueChange={setLayout}
-          buttons={[
-            { value: 'comfortable', label: 'Confortable' },
-            { value: 'compact', label: 'Compact' },
-          ]}
-        />
-        <View style={styles.grid}>
-          {Array.from({ length: 6 }, (_, index) => (
-            <View key={index} style={[styles.gridItem, { width: `${100 / columns - 2}%`, minWidth: 100 }]}>
-              <Block
-                color={palette[index % 3] ?? theme.colors.primaryContainer}
-                height={layout === 'compact' ? 44 : 78}
-                label={`Carte ${index + 1}`}
+            </ScrollView>
+            {phone ? <FAB icon="mi:add" accessibilityLabel="Nouveau client" onPress={noop} style={styles.fab} /> : null}
+          </DeviceFrame>
+        </Demo>
+      ),
+    },
+    {
+      id: 'dashboard',
+      title: 'Dashboard layout',
+      source: 'ResponsiveGrid (KPI) + graphiques',
+      description:
+        'KPI en 2 colonnes sur téléphone, 4 sur tablette ; les graphiques passent côte à côte au-delà de 600 px.',
+      children: (
+        <Demo label="Tableau de bord" muted>
+          <DeviceFrame width={w} height={520}>
+            <ScrollView nestedScrollEnabled contentContainerStyle={styles.pad16}>
+              <Text style={[kitText.pageTitle, styles.mb12, { color: kit.textPrimary }]}>Tableau de bord</Text>
+              <ResponsiveGrid minItemWidth={160} spacing={10}>
+                <KpiCard icon="mi:groups" value="1 284" label="Clients" tone="primary" />
+                <KpiCard icon="mi:local-shipping" value="8 432" label="Véhicules" tone="info" />
+                <KpiCard icon="mi:payments" value="55,8 M" label="CA" tone="success" />
+                <KpiCard icon="mi:warning-amber" value="17" label="Alertes" tone="warning" />
+              </ResponsiveGrid>
+              <View style={styles.mt10}>
+                <ResponsiveGrid minItemWidth={300} spacing={10} maxColumns={2}>
+                  <KitCard title="Chiffre d’affaires">
+                    <KitChart
+                      kind="area"
+                      labels={MOIS.slice(0, 10)}
+                      series={[{ label: '2026', data: CA_2026.slice(0, 10) }]}
+                      height={130}
+                      showLegend={false}
+                    />
+                  </KitCard>
+                  <KitCard title="Répartition">
+                    <KitChart
+                      kind="doughnut"
+                      labels={['Abonnement', 'Installation', 'Matériel']}
+                      series={[{ label: 'Part', data: [60, 25, 15] }]}
+                      height={130}
+                      showLegend={false}
+                    />
+                  </KitCard>
+                </ResponsiveGrid>
+              </View>
+            </ScrollView>
+          </DeviceFrame>
+        </Demo>
+      ),
+    },
+    {
+      id: 'two-cols',
+      title: 'Two columns',
+      source: 'fiche détail : colonne principale + colonne latérale',
+      description: 'Sur téléphone la colonne latérale passe sous la principale ; sur tablette, ratio 2 : 1.',
+      children: (
+        <Demo label="Fiche client" muted>
+          <DeviceFrame width={w} height={460}>
+            <ScrollView nestedScrollEnabled contentContainerStyle={styles.pad16}>
+              <TwoCols
+                main={
+                  <KitCard title="Informations" icon="mi:info-outline">
+                    <Line k="Raison sociale" v="Transports Yao & Fils" />
+                    <Line k="Contact" v="Jean Kouassi" />
+                    <Line k="Ville" v="Abidjan" />
+                    <Line k="Véhicules" v="24" />
+                  </KitCard>
+                }
+                side={
+                  <KitCard title="Activité" icon="mi:history">
+                    {TIMELINE_EVENTS.slice(0, 3).map((e) => (
+                      <View key={e.titre} style={styles.activity}>
+                        <Icon source={e.icon} size={18} color={toneColor(e.tone, kit)} />
+                        <Text style={[font('500', 14), styles.fill, { color: kit.textPrimary }]}>{e.titre}</Text>
+                      </View>
+                    ))}
+                  </KitCard>
+                }
               />
+            </ScrollView>
+          </DeviceFrame>
+        </Demo>
+      ),
+    },
+    {
+      id: 'three-cols',
+      title: 'Three columns',
+      source: 'ResponsiveGrid maxColumns={3}',
+      children: (
+        <Demo label="Offres" muted>
+          <DeviceFrame width={w} height={440}>
+            <ScrollView nestedScrollEnabled contentContainerStyle={styles.pad16}>
+              <ResponsiveGrid minItemWidth={220} maxColumns={3} spacing={10}>
+                {OFFERS.map(([t, p, ic]) => (
+                  <KitCard key={t}>
+                    <Icon source={ic} size={24} color={kit.primary} />
+                    <Text style={[kitText.cardTitle, styles.mt8, { color: kit.textPrimary }]}>{t}</Text>
+                    <Text style={[font('400', 14), { color: kit.textSecondary }]}>{`${p} / mois`}</Text>
+                  </KitCard>
+                ))}
+              </ResponsiveGrid>
+            </ScrollView>
+          </DeviceFrame>
+        </Demo>
+      ),
+    },
+    {
+      id: 'sidebar',
+      title: 'Sidebar layout',
+      source: 'KitNavigationRail (tablette) / tiroir (téléphone)',
+      children: (
+        <Demo label="Navigation adaptative" muted>
+          <DeviceFrame width={w} height={360}>
+            {phone ? (
+              <View style={styles.fill}>
+                <KitAppBar
+                  leading={<KitIconButton icon="mi:menu" accessibilityLabel="Menu" onPress={noop} />}
+                  title="Clients"
+                />
+                <View style={styles.centered}>
+                  <Text style={[font('400', 14), { color: kit.textPrimary }]}>Contenu — menu dans le tiroir</Text>
+                </View>
+                <KitNavigationBar destinations={NAV} selected={nav} onSelect={setNav} />
+              </View>
+            ) : (
+              <View style={styles.row}>
+                <KitNavigationRail destinations={NAV} selected={nav} onSelect={setNav} />
+                <View style={[styles.vrule, { backgroundColor: kit.divider }]} />
+                <View style={styles.centered}>
+                  <Text style={[font('400', 14), { color: kit.textPrimary }]}>Contenu</Text>
+                </View>
+              </View>
+            )}
+          </DeviceFrame>
+        </Demo>
+      ),
+    },
+    {
+      id: 'full',
+      title: 'Full width',
+      source: 'contenu bord à bord (carte, média)',
+      children: (
+        <Demo label="Bandeau pleine largeur" flush>
+          <Banner>
+            <Text style={[font('700', 22, 'heading'), { color: WHITE }]}>Votre flotte, en temps réel</Text>
+          </Banner>
+        </Demo>
+      ),
+    },
+    {
+      id: 'sections',
+      title: 'Card sections',
+      source: 'KitCard (title, icon, trailing)',
+      cols: 2,
+      children: [
+        <KitCard
+          key="contact"
+          title="Coordonnées"
+          icon="mi:contact-mail"
+          trailing={<KitIconButton icon="mi:edit" size={18} accessibilityLabel="Modifier" onPress={noop} />}
+        >
+          <Line k="Téléphone" v="+225 07 10 20 30 40" />
+          <Line k="E-mail" v="contact@yao.ci" />
+        </KitCard>,
+        <KitCard
+          key="equip"
+          title="Équipements"
+          icon="mi:settings-input-antenna"
+          trailing={<StatusBadge label="24" tone="primary" />}
+        >
+          <Line k="Balises actives" v="22" />
+          <Line k="Hors ligne" v="2" />
+        </KitCard>,
+      ],
+    },
+    {
+      id: 'responsive',
+      title: 'Responsive containers',
+      source: 'onLayout · ResponsiveGrid',
+      description: 'Faites glisser pour changer la largeur disponible : la grille recalcule son nombre de colonnes.',
+      children: (
+        <Demo label={`Largeur : ${Math.round(resp)} px`}>
+          <Gap>
+            <KitSlider value={resp} min={280} max={1024} onChange={setResp} accessibilityLabel="Largeur disponible" />
+            <DeviceFrame width={resp} height={240}>
+              <View style={styles.pad12}>
+                <Text style={[font('700', 14), styles.mb8, { color: kit.textPrimary }]}>
+                  {`${columns(resp - 24, 4)} colonne(s)`}
+                </Text>
+                <ResponsiveGrid minItemWidth={150} spacing={8}>
+                  {Array.from({ length: 6 }, (_, i) => (
+                    <View key={i} style={[styles.cell, { backgroundColor: withAlpha(kit.primary, 0.12 + i * 0.05) }]}>
+                      <Text style={[font('400', 14), { color: kit.textPrimary }]}>{i + 1}</Text>
+                    </View>
+                  ))}
+                </ResponsiveGrid>
+              </View>
+            </DeviceFrame>
+          </Gap>
+        </Demo>
+      ),
+    },
+    {
+      id: 'breakpoints',
+      title: 'Breakpoints',
+      source: 'breakpoints (theme/tokens)',
+      children: [
+        <KitCard key="table" padding={0}>
+          {BREAKPOINTS.map(([n, u]) => (
+            <View key={n} style={styles.bpRow}>
+              <Text
+                style={[font('400', 11.5, 'mono'), styles.bpName, { color: kit.primary }]}
+              >{`breakpoints.${n}`}</Text>
+              <View style={styles.fill}>
+                <Text style={[font('500', 14), { color: kit.textPrimary }]}>{`${breakpoints[n]} px`}</Text>
+                <Text style={[font('400', 12.5), { color: kit.textSecondary }]}>{u}</Text>
+              </View>
+              {screen >= breakpoints[n] ? <Icon source="mi:check-circle" size={18} color={kit.success} /> : null}
             </View>
           ))}
-        </View>
-        <Text variant="bodySmall">
-          Grille active : {columns} colonne(s) ·{' '}
-          {layout === 'comfortable' ? 'espacements confortables' : 'espacements compacts'}.
-        </Text>
-      </Section>
+        </KitCard>,
+        <Text key="current" style={[font('400', 12), { color: kit.textMuted }]}>
+          {`Largeur actuelle : ${Math.round(screen)} px`}
+        </Text>,
+      ],
+    },
+  ];
 
-      <Section title="Breakpoints">
-        <View style={styles.breakpointRow}>
-          {[
-            ['compact', '< 600 dp'],
-            ['medium', '600–959 dp'],
-            ['expanded', '≥ 960 dp'],
-          ].map(([name, range], index) => (
-            <Card
-              key={name}
-              mode="outlined"
-              style={[
-                styles.breakpointCard,
-                {
-                  borderColor: (frameWidth < 600 ? index === 0 : frameWidth < 960 ? index === 1 : index === 2)
-                    ? theme.colors.primary
-                    : theme.colors.outlineVariant,
-                },
-              ]}
-            >
-              <Card.Content>
-                <Text variant="titleSmall">{name}</Text>
-                <Text variant="bodySmall">{range}</Text>
-              </Card.Content>
-            </Card>
-          ))}
-        </View>
-        <Text variant="bodySmall">
-          Largeur d’essai {frameWidth} dp · changement de layout aux points de rupture du kit.
-        </Text>
-      </Section>
-    </Page>
-  );
-}
-
-function InfoLine({ label, value }: { label: string; value: string }) {
   return (
-    <View style={styles.infoLine}>
-      <Text variant="bodySmall">{label}</Text>
-      <Text variant="bodyMedium">{value}</Text>
-    </View>
-  );
-}
-function ChartBars({ theme }: { theme: ReturnType<typeof useKitTheme> }) {
-  return (
-    <View style={styles.bars}>
-      {[42, 58, 48, 76, 64, 90, 69, 100, 83, 110, 94, 125].map((height, index) => (
-        <View
-          key={index}
-          style={[
-            styles.bar,
-            { height, backgroundColor: index === 11 ? theme.colors.primary : theme.colors.primaryContainer },
+    <DocPage
+      title="Layout"
+      icon="mi:dashboard-customize"
+      initialSection={initialSection}
+      testID="category-layout"
+      subtitle="Structures de page : conteneur, en-tête, grilles de tableau de bord, fiche en colonnes, panneaux de section, conteneurs responsive. Basculez téléphone / tablette pour voir la recomposition."
+      header={
+        <SegmentedToggle
+          value={device}
+          onChange={setDevice}
+          options={[
+            { value: 'phone', label: 'Téléphone', icon: 'mi:smartphone' },
+            { value: 'tablet', label: 'Tablette', icon: 'mi:tablet-mac' },
           ]}
         />
-      ))}
-    </View>
+      }
+      sections={sections}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  section: { gap: space.s2 },
-  content: { gap: space.s2 },
-  row: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: space.s2 },
-  block: { width: '100%', borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', padding: space.s2 },
-  appFrame: { borderWidth: 1, borderRadius: radius.lg, overflow: 'hidden' },
-  appBar: {
-    height: 52,
-    paddingHorizontal: space.s3,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  pageContent: { padding: space.s3, gap: space.s2 },
-  bottomNav: { minHeight: 50, borderTopWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.s2 },
-  gridItem: { minWidth: 118 },
-  kpi: { gap: space.s1 },
-  chart: { flex: 1, minWidth: 200 },
-  bars: {
-    height: 150,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    paddingTop: space.s2,
-  },
-  bar: { width: 10, borderTopLeftRadius: 4, borderTopRightRadius: 4 },
-  donut: {
-    width: 110,
-    height: 110,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 16,
-    borderColor: '#91b4f4',
-    borderRadius: 60,
-    marginTop: space.s2,
-  },
-  columns: { gap: space.s2 },
-  tabletColumns: { flexDirection: 'row' },
-  mainColumn: { flex: 2, minWidth: 210 },
-  sideColumn: { flex: 1, minWidth: 190 },
-  infoLine: {
-    paddingVertical: space.s2,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#aab2c0',
-    gap: space.s1,
-  },
-  divider: { marginVertical: space.s1 },
-  rail: { minWidth: 150, padding: space.s2, gap: space.s1 },
-  contentWidth: { width: '100%', maxWidth: 680, padding: space.s3, borderRadius: radius.md, gap: space.s1 },
-  breakpointRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.s2 },
-  breakpointCard: { flex: 1, minWidth: 115 },
+  fill: { flex: 1 },
+  flex2: { flex: 2 },
+  abs: { position: 'absolute', left: 0, top: 0 },
+  row: { flex: 1, flexDirection: 'row' },
+  rowGap10: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  pad12: { padding: space.s3 },
+  pad16: { padding: space.s4 },
+  mt8: { marginTop: 8 },
+  mt10: { marginTop: 10 },
+  mb8: { marginBottom: 8 },
+  mb12: { marginBottom: 12 },
+  frameHost: { alignItems: 'center' },
+  frame: { position: 'absolute', borderRadius: 28, padding: space.s2 },
+  screen: { borderRadius: radius.xl, overflow: 'hidden' },
+  fab: { position: 'absolute', right: 16, bottom: 16 },
+  list: { gap: space.s2, marginTop: 12 },
+  line: { flexDirection: 'row', alignItems: 'center', paddingVertical: space.s2, gap: space.s2 },
+  lineValue: { flexShrink: 1, textAlign: 'right' },
+  stack: { gap: 12 },
+  cols: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  activity: { flexDirection: 'row', alignItems: 'center', gap: space.m, minHeight: 40 },
+  vrule: { width: 1 },
+  banner: { height: 130, padding: space.s5, justifyContent: 'flex-end', overflow: 'hidden' },
+  cell: { height: 46, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  bpRow: { flexDirection: 'row', alignItems: 'center', gap: space.m, minHeight: 64, paddingHorizontal: space.m },
+  bpName: { width: 120 },
 });

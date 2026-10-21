@@ -13,6 +13,9 @@ import { FeedbackGallery } from '../src/showcase/FeedbackGallery';
 import { FieldsGallery } from '../src/showcase/FieldsGallery';
 import { FormsGallery } from '../src/showcase/FormsGallery';
 import { InteractionsGallery } from '../src/showcase/InteractionsGallery';
+import { LayoutGallery } from '../src/showcase/LayoutGallery';
+import { MapsGallery } from '../src/showcase/MapsGallery';
+import { MediaGallery } from '../src/showcase/MediaGallery';
 import { MaterialGallery } from '../src/showcase/MaterialGallery';
 import { PlanningGallery } from '../src/showcase/PlanningGallery';
 import { Demo, DocPage } from '../src/showcase/doc';
@@ -96,6 +99,9 @@ describe.each([
   ['planning', PlanningGallery],
   ['interactions', InteractionsGallery],
   ['material', MaterialGallery],
+  ['maps', MapsGallery],
+  ['media', MediaGallery],
+  ['layout', LayoutGallery],
 ] as const)('galerie %s', (id, Gallery) => {
   it.each(['light', 'dark'] as const)('mêmes sections que le catalogue Flutter (%s)', async (mode) => {
     useThemeStore.setState({ mode });

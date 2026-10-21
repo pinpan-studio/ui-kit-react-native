@@ -437,9 +437,7 @@ export function MaterialGallery({ initialSection }: { initialSection?: string })
                           {`${date(t)} à ${time(t.getHours(), t.getMinutes())}`}
                         </Text>
                       </View>
-                      <View style={styles.badgeCell}>
-                        <StatusBadge label={`${speed} km/h`} tone={tone} uppercase={false} />
-                      </View>
+                      <StatusBadge label={`${speed} km/h`} tone={tone} uppercase={false} />
                     </>
                   </TouchableRipple>
                 );
@@ -597,7 +595,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.m,
   },
   virtualIdx: { minWidth: 48 },
-  badgeCell: { justifyContent: 'center' },
   rippleBox: { height: 90, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center' },
   centerItems: { alignItems: 'center' },
   rippleCircle: { width: 90, height: 90, borderRadius: 45, alignItems: 'center', justifyContent: 'center' },

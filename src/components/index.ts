@@ -155,3 +155,18 @@ export {
   PlanningToolbar,
 } from './planning/Planning';
 export * from './planning/models';
+export { FlatMarker, KitMap, MapStatePlaceholder, type KitMapHandle } from './map/KitMap';
+export * from './map/models';
+export { GradientScrim, KitAudioPlayer, KitVideoPlayer, YoutubeFacade } from './media/Players';
+export {
+  FilePreview,
+  FileTypeIcon,
+  FileViewer,
+  ImageCropper,
+  ImageGallery,
+  KitCarousel,
+  Lightbox,
+  MasonryGrid,
+  PdfViewer,
+  type CarouselSlide,
+} from './media/Viewers';
