@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { hapticToggle, KitIconButton, useBackClose } from '../mobile';
 import { categoryById } from '../showcase/kitNav';
+import { pageExampleBySlug } from '../showcase/pageExamples';
 import { useThemeStore } from '../store/themeStore';
 import { useKitTheme } from '../theme/useKitTheme';
 import { activeIndex, DESTINATIONS, navModeFor } from './destinations';
@@ -17,6 +18,9 @@ import { PaletteSheet } from './PaletteSheet';
 function titleFor(pathname: string): string {
   const m = pathname.match(/^\/components\/([^/]+)/);
   if (m?.[1]) return categoryById(m[1])?.label ?? 'Composants';
+  if (pathname === '/pages') return 'Pages d’exemple';
+  const page = pathname.match(/^\/pages\/([^/]+)/);
+  if (page?.[1]) return pageExampleBySlug(page[1])?.title ?? 'Exemple';
   return DESTINATIONS[activeIndex(pathname)]?.label ?? 'UI Kit';
 }
 

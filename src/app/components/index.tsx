@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { List } from 'react-native-paper';
+import { Button, List, Text } from 'react-native-paper';
 
 import { Page } from '../../shell/Page';
 import { KIT_CATEGORIES } from '../../showcase/kitNav';
@@ -22,6 +22,10 @@ export default function ComponentsIndex() {
           accessibilityLabel={`${c.label}, ${c.sections.length} sections`}
         />
       ))}
+      <Text variant="titleMedium">Pages d’exemple</Text>
+      <Button mode="contained-tonal" icon="view-dashboard-outline" onPress={() => router.push('/pages')}>
+        Ouvrir les pages d’exemple
+      </Button>
     </Page>
   );
 }

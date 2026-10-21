@@ -103,6 +103,16 @@ export function NavPanel({ onNavigate }: { onNavigate?: () => void }) {
               />
             ))}
           </Drawer.Section>
+          <Drawer.Section title="Exemples" showDivider={false}>
+            <Drawer.Item
+              label="Pages d’exemple"
+              icon="view-dashboard-outline"
+              active={pathname.startsWith('/pages')}
+              onPress={() => go('/pages')}
+              style={styles.item}
+              accessibilityLabel="Ouvrir les pages d’exemple"
+            />
+          </Drawer.Section>
         </>
       )}
     </ScrollView>

@@ -40,6 +40,9 @@ export default function ShowcaseHome() {
         <Button mode="contained" contentStyle={styles.btn} onPress={() => router.navigate('/components')}>
           Composants
         </Button>
+        <Button mode="outlined" contentStyle={styles.btn} onPress={() => router.navigate('/pages')}>
+          Pages d’exemple
+        </Button>
         <Button
           mode="contained"
           buttonColor={theme.kit.success}
