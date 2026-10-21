@@ -56,6 +56,8 @@ export interface KitColors {
   /** M3 désactivé : contenu on-surface 38 %, conteneur on-surface 12 %. */
   disabledContent: string;
   disabledContainer: string;
+  /** Texte sur une teinte pleine (pastille compteur, overlay) : blanc. */
+  onTone: string;
 }
 
 /** `#rrggbb` + opacité → `#rrggbbaa`. */
@@ -63,6 +65,15 @@ export const withAlpha = (hex: string, alpha: number): string =>
   `${hex.slice(0, 7)}${Math.round(alpha * 255)
     .toString(16)
     .padStart(2, '0')}`;
+
+/** Couleur opaque de `fg` posé à `alpha` sur `bg` (`Color.alphaBlend` Flutter). */
+export function mix(fg: string, bg: string, alpha: number): string {
+  const channel = (i: number) =>
+    Math.round(parseInt(fg.slice(i, i + 2), 16) * alpha + parseInt(bg.slice(i, i + 2), 16) * (1 - alpha))
+      .toString(16)
+      .padStart(2, '0');
+  return `#${channel(1)}${channel(3)}${channel(5)}`;
+}
 
 export const getRoles = (id: PaletteId, mode: ColorMode): M3Roles => PALETTES[id][mode];
 
@@ -104,5 +115,6 @@ export function buildKitColors(roles: M3Roles, mode: ColorMode): KitColors {
     fieldBg: roles.surfaceContainerHigh,
     disabledContent: withAlpha(roles.onSurface, 0.38),
     disabledContainer: withAlpha(roles.onSurface, 0.12),
+    onTone: '#ffffff',
   };
 }

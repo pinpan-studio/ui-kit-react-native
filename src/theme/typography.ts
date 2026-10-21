@@ -44,6 +44,12 @@ export const kitText = {
 
 export type KitTextVariant = keyof typeof kitText;
 
+/** Style ponctuel hors échelle (`TextStyle(fontSize: 13, fontWeight: w600)` Flutter) ; Inter par défaut. */
+export const font = (weight: FontWeight, fontSize: number, role: FontRole = 'body'): TextStyle => ({
+  fontFamily: fontFamily(role, weight),
+  fontSize,
+});
+
 /** Chiffres tabulaires (`.text-tabular`). */
 export const tabular: TextStyle = { fontVariant: ['tabular-nums'] };
 
