@@ -461,7 +461,6 @@ export function FormsGallery({ initialSection }: { initialSection?: string }) {
                 <KitChip
                   key={s}
                   label={s}
-                  icon={chips.includes(s) ? 'mi:check' : undefined}
                   selected={chips.includes(s)}
                   onPress={() => setChips(chips.includes(s) ? chips.filter((x) => x !== s) : [...chips, s])}
                 />

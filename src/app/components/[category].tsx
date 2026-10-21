@@ -402,10 +402,10 @@ export default function CategoryPage() {
   if (cat.id === 'interactions') return <InteractionsGallery />;
   if (cat.id === 'material') return <MaterialGallery />;
   if (cat.id === 'layout') return <LayoutGallery />;
-  if (cat.id === 'navigation') return <NavigationGallery />;
+  if (cat.id === 'navigation') return <NavigationGallery key={section} initialSection={section} />;
   if (cat.id === 'fields') return <FieldsGallery key={section} initialSection={section} />;
   if (cat.id === 'feedback') return <FeedbackGallery key={section} initialSection={section} />;
-  if (cat.id === 'data') return <DataGallery />;
+  if (cat.id === 'data') return <DataGallery key={section} initialSection={section} />;
   return (
     <Page testID={`category-${cat.id}`}>
       <Text variant="titleLarge" accessibilityRole="header">

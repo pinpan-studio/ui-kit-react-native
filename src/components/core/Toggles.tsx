@@ -68,14 +68,18 @@ export function KitChip({
   selected = false,
   onPress,
   icon,
+  check = true,
 }: {
   label: string;
   selected?: boolean;
   onPress?: () => void;
   icon?: string;
+  /** Coche M3 quand la puce est sélectionnée (`showCheckmark` Flutter). */
+  check?: boolean;
 }) {
   const { kit, roles } = useKitTheme();
   const color = selected ? roles.onSecondaryContainer : kit.textPrimary;
+  const lead = selected && check && onPress ? 'mi:check' : icon;
   return (
     <TouchableRipple
       onPress={onPress}
@@ -86,7 +90,7 @@ export function KitChip({
       style={[styles.kitChip, { backgroundColor: selected ? roles.secondaryContainer : kit.fieldBg }]}
     >
       <View style={styles.segmentRow}>
-        {icon ? <Icon source={icon} size={18} color={color} /> : null}
+        {lead ? <Icon source={lead} size={18} color={color} /> : null}
         <Text style={[styles.kitChipLabel, { color }]}>{label}</Text>
       </View>
     </TouchableRipple>

@@ -121,3 +121,12 @@ export function fold(s: string): string {
     .replace(/œ/g, 'oe')
     .replace(/’/g, "'");
 }
+
+/** `14 oct.` */
+export const dayMonth = (d: Date): string => `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+
+const WEEKDAYS_LONG = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+
+/** `mardi 14 octobre` */
+export const weekday = (d: Date): string =>
+  `${WEEKDAYS_LONG[(d.getDay() + 6) % 7]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;

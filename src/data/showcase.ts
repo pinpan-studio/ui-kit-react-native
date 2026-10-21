@@ -308,3 +308,119 @@ export const NOTIFICATIONS: DemoNotification[] = [
     category: 'Commercial',
   },
 ];
+
+export const MOIS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+export const CA_2026 = [38.2, 41.5, 39.8, 44.1, 47.6, 46.2, 49.9, 52.4, 51.1, 55.8, 0, 0];
+export const CA_2025 = [31.4, 33.0, 34.8, 35.2, 37.9, 38.4, 40.1, 41.7, 42.2, 44.0, 45.3, 47.9];
+
+export interface TimelineEvent {
+  date: Date;
+  icon: string;
+  tone: KitTone;
+  titre: string;
+  texte: string;
+}
+
+export const TIMELINE_EVENTS: TimelineEvent[] = [
+  {
+    date: new Date(2026, 9, 13, 9, 12),
+    icon: 'mi:add-circle',
+    tone: 'primary',
+    titre: 'Requête créée',
+    texte: 'REQ-2026-0412 « Balise hors ligne » ouverte par Marie Yao.',
+  },
+  {
+    date: new Date(2026, 9, 13, 10, 5),
+    icon: 'mi:assignment-ind',
+    tone: 'info',
+    titre: 'Affectée',
+    texte: 'Assignée à Koffi N’Guessan (équipe technique Abidjan Sud).',
+  },
+  {
+    date: new Date(2026, 9, 13, 14, 40),
+    icon: 'mi:engineering',
+    tone: 'warning',
+    titre: 'Intervention planifiée',
+    texte: 'Passage sur site prévu le 14/10 à 08:30 — Zone 4, Marcory.',
+  },
+  {
+    date: new Date(2026, 9, 14, 9, 55),
+    icon: 'mi:check-circle',
+    tone: 'success',
+    titre: 'Résolue',
+    texte: 'Antenne GPS remplacée, balise de nouveau en ligne.',
+  },
+  {
+    date: new Date(2026, 9, 14, 11, 20),
+    icon: 'mi:lock',
+    tone: 'neutral',
+    titre: 'Clôturée',
+    texte: 'Clôture validée par le client (satisfaction 5/5).',
+  },
+];
+
+/** Entrée de menu du shell (`MenuEntry` Flutter, `menu.data.ts`). */
+export interface MenuEntry {
+  id: string;
+  label: string;
+  icon: string;
+  children?: MenuEntry[];
+}
+
+const m = (id: string, label: string, icon: string, children?: MenuEntry[]): MenuEntry => ({
+  id,
+  label,
+  icon,
+  children,
+});
+
+/** Menu d'exemple du Sidecar de démonstration. */
+export const DEMO_MENU: MenuEntry[] = [
+  m('dashboard', 'Tableau de bord', 'mi:dashboard'),
+  m('client', 'Clients', 'mi:people'),
+  m('produit', 'Produits', 'mi:inventory-2'),
+  m('equipement', 'Équipement', 'mi:settings-input-antenna'),
+  m('service-client', 'Service Client', 'mi:support-agent', [
+    m('sc-dashboard', 'Tableau de bord', 'mi:analytics'),
+    m('sc-requetes', 'Requêtes clients', 'mi:contact-support'),
+    m('sc-programmations', 'Programmations', 'mi:event-available'),
+    m('sc-gestionnaires', 'Gestionnaires clients', 'mi:assignment-ind'),
+    m('sc-equipe', 'Équipe', 'mi:groups'),
+  ]),
+  m('intervention', 'Intervention', 'mi:build', [
+    m('int-dashboard', 'Tableau de bord', 'mi:analytics'),
+    m('int-missions', 'Missions', 'mi:assignment'),
+    m('int-programmees', 'Interventions programmées', 'mi:event-note'),
+    m('int-equipe', 'Équipe Technique', 'mi:engineering'),
+  ]),
+  m('synchronizations', 'Synchronisations', 'mi:cloud-sync'),
+  m('repertoire', 'Répertoire', 'mi:menu-book'),
+  m('assac', 'ASSAC', 'mi:hub', [
+    m('assac-agenda', 'Agenda', 'mi:calendar-month'),
+    m('assac-appels', 'Appels', 'mi:call'),
+    m('assac-rdv', 'RDV', 'mi:event'),
+    m('assac-promesses', 'Promesses', 'mi:task-alt'),
+    m('assac-prospects', 'Prospects', 'mi:contact-page'),
+    m('assac-dossiers', 'Dossiers', 'mi:folder-shared'),
+  ]),
+  m('cesar', 'CESAR', 'mi:savings', [
+    m('cesar-dashboard', 'Tableau de bord', 'mi:analytics'),
+    m('cesar-customers', 'Gestion Clients', 'mi:contact-page'),
+    m('cesar-encaissements', 'Encaissements', 'mi:payments'),
+    m('cesar-ecritures', 'Factures', 'mi:receipt-long'),
+    m('cesar-notes', 'Notes', 'mi:sticky-note-2'),
+  ]),
+  m('taches', 'Tâches', 'mi:task-alt'),
+  m('finance', 'Finance', 'mi:account-balance', [
+    m('facture', 'Factures', 'mi:receipt'),
+    m('fin-exercices', 'Exercices comptables', 'mi:event-note'),
+    m('fin-paiements', 'Paiements', 'mi:payments'),
+    m('fin-abonnements', 'Abonnements', 'mi:subscriptions'),
+    m('fin-groupes', 'Groupes de facturation', 'mi:workspaces'),
+  ]),
+  m('file-manager', 'Gestionnaire de Fichiers', 'mi:folder'),
+  m('admin', 'Administration', 'mi:admin-panel-settings', [
+    m('user-list', 'Utilisateurs', 'mi:people'),
+    m('group-list', 'Groupes', 'mi:group'),
+  ]),
+];

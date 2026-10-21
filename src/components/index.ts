@@ -84,3 +84,45 @@ export {
   PushMessage,
   SidePanel,
 } from './overlays/Dialogs';
+export {
+  KitChart,
+  RingGauge,
+  Sparkline,
+  chartPalette,
+  niceScale,
+  type ChartKind,
+  type ChartSeries,
+} from './data/Charts';
+export { KitDataTable, type BulkAction, type KitColumn } from './data/DataTable';
+export {
+  AuditLog,
+  BarcodeBlock,
+  DescriptionList,
+  KitTimeline,
+  QrBlock,
+  StatCounter,
+  SwipeRow,
+  TextDiff,
+  code128,
+  dayKey,
+  diffLines,
+  type AuditEntry,
+  type DescItem,
+  type TimelineEntry,
+} from './data/Display';
+export {
+  BadgedIcon,
+  Breadcrumb,
+  KitAppBar,
+  KitNavigationBar,
+  KitNavigationRail,
+  KitPaginator,
+  KitStepper,
+  KitTabs,
+  NavigationDrawerContent,
+  Sidecar,
+  StepsIndicator,
+  type NavDestination,
+  type StepSpec,
+  type TabSpec,
+} from './navigation/Navigation';

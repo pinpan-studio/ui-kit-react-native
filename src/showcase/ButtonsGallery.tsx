@@ -304,7 +304,7 @@ export function ButtonsGallery({ initialSection }: { initialSection?: string }) 
                 ['annee', 'Année'],
               ] as const
             ).map(([k, l]) => (
-              <KitChip key={k} label={l} selected={tab === k} onPress={() => setTab(k)} />
+              <KitChip key={k} label={l} selected={tab === k} check={false} onPress={() => setTab(k)} />
             ))}
           </DemoWrap>
         </Demo>,

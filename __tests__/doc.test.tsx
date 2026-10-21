@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, within } from '@testing-library/react-native';
 import * as Clipboard from 'expo-clipboard';
 import type { ReactElement } from 'react';
 import { Text } from 'react-native';
@@ -7,6 +7,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { KitSlider, KitTextField, MarkdownView } from '../src/components';
 import { SnackProvider } from '../src/core/snack';
 import { ButtonsGallery } from '../src/showcase/ButtonsGallery';
+import { DataGallery } from '../src/showcase/DataGallery';
+import { NavigationGallery } from '../src/showcase/NavigationGallery';
 import { FeedbackGallery } from '../src/showcase/FeedbackGallery';
 import { FieldsGallery } from '../src/showcase/FieldsGallery';
 import { FormsGallery } from '../src/showcase/FormsGallery';
@@ -84,6 +86,8 @@ describe.each([
   ['forms', FormsGallery],
   ['fields', FieldsGallery],
   ['feedback', FeedbackGallery],
+  ['navigation', NavigationGallery],
+  ['data', DataGallery],
 ] as const)('galerie %s', (id, Gallery) => {
   it.each(['light', 'dark'] as const)('mêmes sections que le catalogue Flutter (%s)', async (mode) => {
     useThemeStore.setState({ mode });
@@ -91,7 +95,7 @@ describe.each([
     const cat = categoryById(id);
     expect(cat).toBeDefined();
     for (const s of cat?.sections ?? []) expect(screen.getByTestId(`section-${s.id}`)).toBeTruthy();
-    expect(screen.getAllByRole('tab')).toHaveLength(cat?.sections.length ?? 0);
+    expect(within(screen.getByLabelText('Sommaire')).getAllByRole('tab')).toHaveLength(cat?.sections.length ?? 0);
   });
 });
 
