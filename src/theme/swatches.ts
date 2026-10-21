@@ -67,3 +67,11 @@ export const PDF_BACKDROP = { light: '#525659', dark: '#0b0f12' } as const;
 
 /** Bouton de lecture de la façade YouTube. */
 export const YOUTUBE_RED = '#ff0000';
+
+/** Couleurs de marque des moyens de paiement (page publique de proforma). */
+export const PAYMENT_BRANDS: readonly [string, string][] = [
+  ['Orange Money', '#ff7900'],
+  ['MTN MoMo', '#ffcc00'],
+  ['Wave', '#1dc4ff'],
+  ['Carte bancaire', '#64748b'],
+];

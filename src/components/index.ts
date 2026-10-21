@@ -84,6 +84,7 @@ export {
   PriorityMessage,
   PromptDialog,
   PushMessage,
+  ModalDrawer,
   SidePanel,
 } from './overlays/Dialogs';
 export {

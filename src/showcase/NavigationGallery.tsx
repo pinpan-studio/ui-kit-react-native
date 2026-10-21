@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
-import { Animated, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, StyleSheet, Text, TextInput, View } from 'react-native';
 import { FAB, Icon, Menu, TouchableRipple } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   BadgedIcon,
@@ -17,6 +16,7 @@ import {
   KitStepper,
   KitTabs,
   KitTextField,
+  ModalDrawer,
   NavigationDrawerContent,
   PageHeader,
   RoundIconButton,
@@ -26,7 +26,7 @@ import {
 } from '../components';
 import { useKitSnack } from '../core/snack';
 import { DEMO_CLIENTS, DEMO_MENU } from '../data/showcase';
-import { font, space, useKitTheme, withAlpha } from '../theme';
+import { font, space, useKitTheme } from '../theme';
 import { Demo, DocPage, Gap, type DocSection } from './doc';
 
 const menuLabel = (id: string) => {
@@ -551,39 +551,20 @@ export function NavigationGallery({ initialSection }: { initialSection?: string 
         subtitle="Éléments de navigation du shell adaptés au mobile : barres d’application, tiroir et Sidecar, barre de navigation basse, onglets, fil d’Ariane, pagination, étapes et menus."
         sections={sections}
       />
-      <Modal
-        visible={drawer}
-        transparent
-        animationType="fade"
-        statusBarTranslucent
-        onRequestClose={() => setDrawer(false)}
-      >
-        <View style={styles.fill}>
-          <Pressable
-            onPress={() => setDrawer(false)}
-            accessibilityRole="button"
-            accessibilityLabel="Fermer le menu"
-            style={[StyleSheet.absoluteFill, { backgroundColor: withAlpha(roles.scrim, 0.32) }]}
-          />
-          <SafeAreaView
-            accessibilityViewIsModal
-            style={[styles.drawer, { backgroundColor: roles.surfaceContainerLow }]}
-          >
-            <NavigationDrawerContent
-              header={<Text style={[font('700', 22, 'brand'), styles.brand, { color: kit.textPrimary }]}>Lookas</Text>}
-              destinations={[
-                ...DEMO_MENU.slice(0, 6).map((m) => ({ label: m.label, icon: m.icon })),
-                { label: 'Paramètres', icon: 'cog-outline' },
-              ]}
-              selected={nav}
-              onSelect={(i) => {
-                setNav(i);
-                setDrawer(false);
-              }}
-            />
-          </SafeAreaView>
-        </View>
-      </Modal>
+      <ModalDrawer visible={drawer} onDismiss={() => setDrawer(false)}>
+        <NavigationDrawerContent
+          header={<Text style={[font('700', 22, 'brand'), styles.brand, { color: kit.textPrimary }]}>Lookas</Text>}
+          destinations={[
+            ...DEMO_MENU.slice(0, 6).map((m) => ({ label: m.label, icon: m.icon })),
+            { label: 'Paramètres', icon: 'cog-outline' },
+          ]}
+          selected={nav}
+          onSelect={(i) => {
+            setNav(i);
+            setDrawer(false);
+          }}
+        />
+      </ModalDrawer>
       <KitBottomSheet visible={sheet} onDismiss={() => setSheet(false)}>
         <View style={styles.sheet}>
           {actions.map(([l, i, danger]) => (
@@ -624,7 +605,6 @@ const styles = StyleSheet.create({
   denseRow: { flexDirection: 'row', alignItems: 'center', gap: space.s4, paddingHorizontal: space.s4, minHeight: 64 },
   tabPanel: { height: 120, alignItems: 'center', justifyContent: 'center' },
   menuDivider: { height: 1, marginVertical: space.s2 },
-  drawer: { width: 300, maxWidth: '85%', height: '100%', borderTopRightRadius: 16, borderBottomRightRadius: 16 },
   brand: { paddingLeft: 16, paddingTop: space.s5, paddingBottom: space.s3 },
   sheet: { paddingBottom: space.s2 },
   sheetRow: { minHeight: 56, justifyContent: 'center', paddingHorizontal: space.l },

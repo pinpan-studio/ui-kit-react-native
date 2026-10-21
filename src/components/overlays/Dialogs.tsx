@@ -381,6 +381,34 @@ export function SidePanel({
   );
 }
 
+/** Tiroir modal gauche (`Drawer` Flutter) : 300 dp, coins droits arrondis, voile qui ferme au toucher. */
+export function ModalDrawer({
+  visible,
+  onDismiss,
+  children,
+}: {
+  visible: boolean;
+  onDismiss: () => void;
+  children: ReactNode;
+}) {
+  const { roles } = useKitTheme();
+  return (
+    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onDismiss}>
+      <View style={styles.fill}>
+        <Pressable
+          onPress={onDismiss}
+          accessibilityRole="button"
+          accessibilityLabel="Fermer le menu"
+          style={[StyleSheet.absoluteFill, { backgroundColor: withAlpha(roles.scrim, 0.32) }]}
+        />
+        <SafeAreaView accessibilityViewIsModal style={[styles.drawer, { backgroundColor: roles.surfaceContainerLow }]}>
+          {children}
+        </SafeAreaView>
+      </View>
+    </Modal>
+  );
+}
+
 /** Dialogue plein écran (`Dialog.fullscreen` Flutter) : barre avec fermeture, titre et action texte. */
 export function FullscreenDialog({
   visible,
@@ -458,6 +486,13 @@ const styles = StyleSheet.create({
   },
   divider: { height: 1 },
   panelHost: { flex: 1, alignItems: 'flex-end' },
+  drawer: {
+    width: 300,
+    maxWidth: '85%',
+    height: '100%',
+    borderTopRightRadius: radius.lg,
+    borderBottomRightRadius: radius.lg,
+  },
   panel: {
     width: 360,
     height: '100%',
