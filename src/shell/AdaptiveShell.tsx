@@ -20,6 +20,8 @@ function titleFor(pathname: string): string {
   const m = pathname.match(/^\/components\/([^/]+)/);
   if (m?.[1]) return categoryById(m[1])?.label ?? 'Composants';
   if (pathname === '/pages') return 'Pages d’exemple';
+  if (pathname === '/pages-gallery') return 'Galerie des pages';
+  if (pathname === '/showcases') return 'Showcases';
   return DESTINATIONS[activeIndex(pathname)]?.label ?? 'UI Kit';
 }
 
@@ -28,7 +30,7 @@ function titleFor(pathname: string): string {
  * barre en bas < 600 dp (comme Flutter, avec tiroir), rail 600–840 dp, panneau latéral permanent au-delà.
  * Sur l'onglet Harnais, toute la navigation est masquée (comme kit_shell.dart) et une action de sortie
  * ramène à la destination précédente.
- * Les démos de gabarits (`/layouts/<démo>`) et les pages d'exemple (`/pages/<page>`) s'affichent en plein écran, avec leur propre barre, comme les
+ * Les démos de gabarits (`/layouts/<démo>`) les pages d'exemple (`/pages/<page>`) et les showcases (`/showcases/<id>`) s'affichent en plein écran, avec leur propre barre, comme les
  * routes poussées par-dessus le shell dans Flutter.
  * Les fonds vont jusqu'aux bords ; le contenu respecte les zones sûres.
  */
@@ -65,7 +67,7 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
   };
   const canGoBack = pathname.split('/').filter(Boolean).length > 1;
 
-  if (/^\/(layouts|pages)\/[^/]+/.test(pathname))
+  if (/^\/(layouts|pages|showcases)\/[^/]+/.test(pathname))
     return (
       <View style={[styles.fill, { backgroundColor: theme.colors.background }]} testID="adaptive-shell-immersive">
         <SnackProvider bottomInset={insets.bottom}>{children}</SnackProvider>

@@ -10,7 +10,6 @@ import { CHAT_CONVERSATIONS, CURRENT_USER } from '../../data/examples';
 import { useBackClose } from '../../mobile';
 import { useThemeStore } from '../../store/themeStore';
 import { breakpoints, font, radius, space, useKitTheme } from '../../theme';
-import { ExampleForm } from '../ExampleForms';
 import { ChatExample, ChatPanel, FeedExample, InboxExample } from './AppComms';
 import { ArticleExample, BlogExample, DocsExample } from './AppContent';
 import { ClientDetailExample, ClientsExample } from './AppCrm';
@@ -24,7 +23,15 @@ import {
   MonitoringExample,
 } from './AppOps';
 import { SettingsExample } from './AppSettings';
-import { ExNavContext, ExPage } from './ExKit';
+import { ExNavContext } from './ExKit';
+import {
+  ApplicationFormExample,
+  BookingFormExample,
+  CheckoutFormExample,
+  ContactFormExample,
+  OnboardingFormExample,
+  SurveyFormExample,
+} from './FormsExamples';
 
 interface NavItem {
   id: string;
@@ -36,15 +43,6 @@ interface NavItem {
   title?: string;
   crumb?: string;
 }
-
-const form = (slug: string) => {
-  const FormPage = () => (
-    <ExPage>
-      <ExampleForm slug={slug} />
-    </ExPage>
-  );
-  return FormPage;
-};
 
 /** `EX_NAV_TOP` */
 const NAV_TOP: NavItem[] = [
@@ -97,12 +95,12 @@ const NAV_GROUPS: [string, string, boolean, NavItem[]][] = [
     'mi:dynamic-form',
     true,
     [
-      { id: 'forms/contact', label: 'Contact', icon: 'mi:contact-mail', page: form('contact') },
-      { id: 'forms/checkout', label: 'Commande', icon: 'mi:shopping-cart-checkout', page: form('checkout') },
-      { id: 'forms/booking', label: 'Réservation', icon: 'mi:event-available', page: form('booking') },
-      { id: 'forms/application', label: 'Candidature', icon: 'mi:assignment-ind', page: form('application') },
-      { id: 'forms/onboarding', label: 'Assistant d’accueil', icon: 'mi:rocket-launch', page: form('onboarding') },
-      { id: 'forms/survey', label: 'Questionnaire', icon: 'mi:quiz', page: form('survey') },
+      { id: 'forms/contact', label: 'Contact', icon: 'mi:contact-mail', page: ContactFormExample },
+      { id: 'forms/checkout', label: 'Commande', icon: 'mi:shopping-cart-checkout', page: CheckoutFormExample },
+      { id: 'forms/booking', label: 'Réservation', icon: 'mi:event-available', page: BookingFormExample },
+      { id: 'forms/application', label: 'Candidature', icon: 'mi:assignment-ind', page: ApplicationFormExample },
+      { id: 'forms/onboarding', label: 'Assistant d’accueil', icon: 'mi:rocket-launch', page: OnboardingFormExample },
+      { id: 'forms/survey', label: 'Questionnaire', icon: 'mi:quiz', page: SurveyFormExample },
     ],
   ],
   [
@@ -136,7 +134,17 @@ const LOGO = require('../../../assets/images/logo.png');
  * dès 960 dp, tiroir en dessous ; barre supérieure de 68 dp avec fil d'Ariane, recherche, messagerie,
  * notifications et compte. Les entrées du menu changent la page ; les détails s'empilent (retour).
  */
-export function ExAppShell({ initial = 'dashboard', initialParam }: { initial?: string; initialParam?: string }) {
+export function ExAppShell({
+  initial = 'dashboard',
+  initialParam,
+  initialChat = false,
+}: {
+  initial?: string;
+  /** Paramètre de la page initiale (`picker` ouvre le sélecteur de fichiers). */
+  initialParam?: string;
+  /** Messagerie latérale ouverte au démarrage (`?chat=c-aya`). */
+  initialChat?: boolean;
+}) {
   const { kit, colorMode } = useKitTheme();
   const snack = useKitSnack();
   const insets = useSafeAreaInsets();
@@ -148,7 +156,7 @@ export function ExAppShell({ initial = 'dashboard', initialParam }: { initial?: 
   const [formsOpen, setFormsOpen] = useState(false);
   const [sideOpen, setSideOpen] = useState(true);
   const [drawer, setDrawer] = useState(false);
-  const [chat, setChat] = useState(false);
+  const [chat, setChat] = useState(initialChat);
   const [account, setAccount] = useState(false);
 
   const top = stack[stack.length - 1]!;

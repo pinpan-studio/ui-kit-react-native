@@ -38,7 +38,7 @@ import {
   type FmItem,
 } from '../../data/examples';
 import { breakpoints, font, radius, space, toneText, useKitTheme, withAlpha, type KitTone } from '../../theme';
-import { ExHeader, ExHeading, ExPage, ExTile, FilePicker, hueColors } from './ExKit';
+import { ExHeader, ExHeading, ExPage, ExTile, FilePicker, hueColors, useExNav } from './ExKit';
 
 // ── Catalogue ───────────────────────────────────────────────────────
 
@@ -230,8 +230,9 @@ export function FilesExample() {
   const { kit } = useKitTheme();
   const snack = useKitSnack();
   const [grid, setGrid] = useState<'grid' | 'list'>('grid');
+  const nav = useExNav();
   const [folder, setFolder] = useState<string | null>(null);
-  const [picker, setPicker] = useState(false);
+  const [picker, setPicker] = useState(nav.param === 'picker');
   const crumbs: FmItem[] = [];
   for (let id = folder; id;) {
     const f = FM_ITEMS.find((i) => i.id === id)!;

@@ -90,14 +90,15 @@ export function ExGap({ children, gap = space.s4 }: { children: ReactNode; gap?:
   return <View style={{ gap }}>{children}</View>;
 }
 
-/** Deux champs côte à côte au-delà de 600 dp, empilés en dessous. */
-export function ExRow({ children }: { children: ReactNode }) {
+/** Deux champs côte à côte au-delà de `minWidth` (600 dp par défaut), empilés en dessous. */
+export function ExRow({ children, minWidth = breakpoints.md }: { children: ReactNode; minWidth?: number }) {
   const [w, setW] = useState(0);
+  const side = w >= minWidth;
   return (
-    <View onLayout={(e) => setW(e.nativeEvent.layout.width)} style={w >= breakpoints.md ? styles.row : styles.stack}>
+    <View onLayout={(e) => setW(e.nativeEvent.layout.width)} style={side ? styles.row : styles.stack}>
       {Array.isArray(children)
         ? children.map((c, i) => (
-            <View key={i} style={w >= breakpoints.md ? styles.fill : undefined}>
+            <View key={i} style={side ? styles.fill : undefined}>
               {c}
             </View>
           ))

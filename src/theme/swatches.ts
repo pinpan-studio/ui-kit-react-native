@@ -75,3 +75,13 @@ export const PAYMENT_BRANDS: readonly [string, string][] = [
   ['Wave', '#1dc4ff'],
   ['Carte bancaire', '#64748b'],
 ];
+
+/** Boutons de connexion sociale aux couleurs des marques : fond, texte. */
+export const SSO_BRANDS = {
+  google: ['#ffffff', '#1f1f1f'],
+  apple: ['#000000', '#ffffff'],
+  microsoft: ['#2f2f2f', '#ffffff'],
+  facebook: ['#1877f2', '#ffffff'],
+  github: ['#24292f', '#ffffff'],
+  linkedin: ['#0a66c2', '#ffffff'],
+} as const;

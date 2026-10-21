@@ -107,10 +107,26 @@ export function NavPanel({ onNavigate }: { onNavigate?: () => void }) {
             <Drawer.Item
               label="Pages d’exemple"
               icon="view-dashboard-outline"
-              active={pathname.startsWith('/pages')}
+              active={pathname === '/pages' || pathname.startsWith('/pages/')}
               onPress={() => go('/pages')}
               style={styles.item}
               accessibilityLabel="Ouvrir les pages d’exemple"
+            />
+            <Drawer.Item
+              label="Galerie des pages"
+              icon="bookmark-multiple-outline"
+              active={pathname === '/pages-gallery'}
+              onPress={() => go('/pages-gallery')}
+              style={styles.item}
+              accessibilityLabel="Ouvrir la galerie des pages"
+            />
+            <Drawer.Item
+              label="Showcases"
+              icon="devices"
+              active={pathname.startsWith('/showcases')}
+              onPress={() => go('/showcases')}
+              style={styles.item}
+              accessibilityLabel="Ouvrir les showcases"
             />
           </Drawer.Section>
         </>
