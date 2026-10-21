@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Animated,
   Easing,
@@ -20,8 +20,9 @@ import { font, radius, space, useKitTheme, withAlpha } from '../../theme';
 import { KitButton } from '../core/Button';
 
 /** Fond assombri commun : touche pour fermer, ignoré des lecteurs d'écran sauf comme action « Fermer ». */
-function Scrim({ onPress }: { onPress: () => void }) {
+function Scrim({ onPress }: { onPress?: () => void }) {
   const { roles } = useKitTheme();
+  if (!onPress) return <View style={[StyleSheet.absoluteFill, { backgroundColor: withAlpha(roles.scrim, 0.32) }]} />;
   return (
     <Pressable
       onPress={onPress}
@@ -42,6 +43,7 @@ export function KitBottomSheet({
   children,
   maxHeightRatio = 0.75,
   handle = true,
+  resizable,
   testID,
 }: {
   visible: boolean;
@@ -49,11 +51,20 @@ export function KitBottomSheet({
   children: ReactNode;
   maxHeightRatio?: number;
   handle?: boolean;
+  /** Feuille extensible (`DraggableScrollableSheet` Flutter) : hauteurs initiale, minimale et maximale. */
+  resizable?: { initial: number; min: number; max: number };
   testID?: string;
 }) {
   const { roles } = useKitTheme();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
+  const [ratio, setRatio] = useState(resizable?.initial ?? 0);
+  const dragStart = useRef<{ y: number; ratio: number } | null>(null);
+  const [wasVisible, setWasVisible] = useState(visible);
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
+    if (visible && resizable) setRatio(resizable.initial);
+  }
   const [slide] = useState(() => new Animated.Value(1));
   useEffect(() => {
     if (!visible) return;
@@ -84,14 +95,39 @@ export function KitBottomSheet({
             styles.sheet,
             {
               backgroundColor: roles.surfaceContainerLow,
-              maxHeight: height * maxHeightRatio + insets.bottom,
+              ...(resizable
+                ? { height: height * ratio + insets.bottom }
+                : { maxHeight: height * maxHeightRatio + insets.bottom }),
               paddingBottom: insets.bottom,
               transform: [{ translateY }],
             },
           ]}
         >
           {handle ? (
-            <View style={styles.handleArea}>
+            <View
+              style={styles.handleArea}
+              accessible={!!resizable}
+              accessibilityRole={resizable ? 'adjustable' : undefined}
+              accessibilityLabel={resizable ? 'Hauteur de la feuille' : undefined}
+              accessibilityActions={resizable ? [{ name: 'increment' }, { name: 'decrement' }] : undefined}
+              onAccessibilityAction={(e) =>
+                resizable && setRatio(e.nativeEvent.actionName === 'increment' ? resizable.max : resizable.min)
+              }
+              onStartShouldSetResponder={() => !!resizable}
+              onMoveShouldSetResponder={() => !!resizable}
+              onResponderGrant={(e) => {
+                dragStart.current = { y: e.nativeEvent.pageY, ratio };
+              }}
+              onResponderMove={(e) => {
+                if (!resizable || !dragStart.current) return;
+                const next = dragStart.current.ratio - (e.nativeEvent.pageY - dragStart.current.y) / height;
+                if (next < resizable.min - 0.08) onDismiss();
+                else setRatio(Math.min(resizable.max, Math.max(resizable.min, next)));
+              }}
+              onResponderRelease={() => {
+                dragStart.current = null;
+              }}
+            >
               <View style={[styles.handle, { backgroundColor: withAlpha(roles.onSurfaceVariant, 0.4) }]} />
             </View>
           ) : null}
@@ -111,10 +147,13 @@ export function KitDialog({
   children,
   actions,
   center = false,
+  dismissible = true,
   testID,
 }: {
   visible: boolean;
   onDismiss: () => void;
+  /** `false` : ni le fond ni le retour Android ne ferment (message bloquant). */
+  dismissible?: boolean;
   icon?: ReactNode;
   title?: string;
   children?: ReactNode;
@@ -125,9 +164,15 @@ export function KitDialog({
 }) {
   const { roles, kit } = useKitTheme();
   return (
-    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onDismiss}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={dismissible ? onDismiss : () => undefined}
+    >
       <KeyboardAvoidingView style={styles.center} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <Scrim onPress={onDismiss} />
+        <Scrim onPress={dismissible ? onDismiss : undefined} />
         <View
           testID={testID}
           accessibilityViewIsModal

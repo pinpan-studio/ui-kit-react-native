@@ -404,7 +404,7 @@ export default function CategoryPage() {
   if (cat.id === 'layout') return <LayoutGallery />;
   if (cat.id === 'navigation') return <NavigationGallery />;
   if (cat.id === 'fields') return <FieldsGallery key={section} initialSection={section} />;
-  if (cat.id === 'feedback') return <FeedbackGallery />;
+  if (cat.id === 'feedback') return <FeedbackGallery key={section} initialSection={section} />;
   if (cat.id === 'data') return <DataGallery />;
   return (
     <Page testID={`category-${cat.id}`}>

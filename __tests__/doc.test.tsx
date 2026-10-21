@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { KitSlider, KitTextField, MarkdownView } from '../src/components';
 import { SnackProvider } from '../src/core/snack';
 import { ButtonsGallery } from '../src/showcase/ButtonsGallery';
+import { FeedbackGallery } from '../src/showcase/FeedbackGallery';
 import { FieldsGallery } from '../src/showcase/FieldsGallery';
 import { FormsGallery } from '../src/showcase/FormsGallery';
 import { Demo, DocPage } from '../src/showcase/doc';
@@ -82,6 +83,7 @@ describe.each([
   ['buttons', ButtonsGallery],
   ['forms', FormsGallery],
   ['fields', FieldsGallery],
+  ['feedback', FeedbackGallery],
 ] as const)('galerie %s', (id, Gallery) => {
   it.each(['light', 'dark'] as const)('mêmes sections que le catalogue Flutter (%s)', async (mode) => {
     useThemeStore.setState({ mode });

@@ -64,3 +64,23 @@ export {
 export { KitRangeSlider } from './inputs/Slider';
 export { DEMO_FILES, DemoFilePicker, DropZone, FileUploadField, type DemoFile } from './inputs/Upload';
 export { FormSheet, KitBottomSheet, KitDialog, SheetHeader, dialogIconDisc } from './overlays/Overlays';
+export {
+  GlobalBanner,
+  IndeterminateBar,
+  KitAlert,
+  KitTooltip,
+  OverlaySpinner,
+  ResultView,
+  UploadQueue,
+  toneIcon,
+} from './feedback/Feedback';
+export {
+  AlertDialog,
+  BottomConfirm,
+  ConfirmDialog,
+  FullscreenDialog,
+  PriorityMessage,
+  PromptDialog,
+  PushMessage,
+  SidePanel,
+} from './overlays/Dialogs';

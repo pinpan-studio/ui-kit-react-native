@@ -253,3 +253,58 @@ export const DEMO_PLACES: PlaceOption[] = [
   place('a15', 'Plage d’Assinie Mafia', 'Assinie', 'Assinie', 5.133, -3.283, 'area'),
   place('a16', 'Quartier France', 'Grand-Bassam', 'Grand-Bassam', 5.198, -3.738, 'area'),
 ];
+
+export interface DemoNotification {
+  icon: string;
+  tone: KitTone;
+  title: string;
+  text: string;
+  minutesAgo: number;
+  read?: boolean;
+  category: string;
+}
+
+export const NOTIFICATIONS: DemoNotification[] = [
+  {
+    icon: 'mi:warning-amber',
+    tone: 'error',
+    title: 'Sortie de zone',
+    text: 'CI-9902-NP a quitté la geofence « Port-Bouët ».',
+    minutesAgo: 4,
+    category: 'Alertes',
+  },
+  {
+    icon: 'mi:payments',
+    tone: 'success',
+    title: 'Paiement reçu',
+    text: 'Bolloré Logistics CI a réglé FAC-2026-0874 (2 100 000 FCFA).',
+    minutesAgo: 22,
+    category: 'Finance',
+  },
+  {
+    icon: 'mi:engineering',
+    tone: 'info',
+    title: 'Intervention planifiée',
+    text: 'INT-0412 confiée à Kouamé Aya pour demain 08:30.',
+    minutesAgo: 75,
+    category: 'Terrain',
+  },
+  {
+    icon: 'mi:sim-card',
+    tone: 'warning',
+    title: 'Forfait SIM bientôt épuisé',
+    text: '12 cartes SIM sous 10 % de data restante.',
+    minutesAgo: 180,
+    read: true,
+    category: 'Système',
+  },
+  {
+    icon: 'mi:person-add',
+    tone: 'primary',
+    title: 'Nouveau client',
+    text: 'Lôh Logistique a signé un contrat de 6 véhicules.',
+    minutesAgo: 1440,
+    read: true,
+    category: 'Commercial',
+  },
+];

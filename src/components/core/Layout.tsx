@@ -53,11 +53,14 @@ export function KitProgressBar({
   value,
   tone = 'primary',
   height = 6,
+  trackColor,
   accessibilityLabel,
 }: {
   value: number;
   tone?: KitTone;
   height?: number;
+  /** Fond de piste (fond de champ par défaut ; secondary-container pour la barre Material d'origine). */
+  trackColor?: string;
   accessibilityLabel?: string;
 }) {
   const { kit } = useKitTheme();
@@ -68,7 +71,7 @@ export function KitProgressBar({
       accessibilityRole="progressbar"
       accessibilityLabel={accessibilityLabel}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(v * 100) }}
-      style={[styles.track, { height, borderRadius: height / 2, backgroundColor: kit.fieldBg }]}
+      style={[styles.track, { height, borderRadius: height / 2, backgroundColor: trackColor ?? kit.fieldBg }]}
     >
       <View style={{ width: `${v * 100}%`, height, borderRadius: height / 2, backgroundColor: toneColor(tone, kit) }} />
     </View>
