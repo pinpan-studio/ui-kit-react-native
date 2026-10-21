@@ -11,7 +11,16 @@ const SEMANTIC = {
   cyan: '#06b6d4',
 } as const;
 
+/**
+ * Couleurs du kit (`KitColors` Flutter, `context.kc`), dérivées des rôles M3 de la palette courante.
+ * Les couleurs sémantiques (succès, alerte, info…) restent fixes d'une palette à l'autre.
+ */
 export interface KitColors {
+  primary: string;
+  primaryLight: string;
+  onPrimary: string;
+  tertiary: string;
+  tertiaryLight: string;
   success: string;
   successLight: string;
   successText: string;
@@ -20,18 +29,33 @@ export interface KitColors {
   warning: string;
   warningLight: string;
   warningText: string;
+  error: string;
+  errorLight: string;
+  errorText: string;
   info: string;
   infoLight: string;
   purple: string;
   purpleLight: string;
   cyan: string;
   cyanLight: string;
-  errorText: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  /** Fond d'écran (surface). */
+  bg: string;
+  /** Fond des cartes et démos (surface-container-low). */
+  card: string;
+  /** Survol / pastilles neutres (surface-container-high). */
+  hover: string;
+  tableHeader: string;
+  border: string;
+  /** Séparateur de lignes de tableau, allégé (outline-variant à 45 %). */
+  divider: string;
+  /** Fond d'un champ au repos (surface-container-high). */
+  fieldBg: string;
   /** M3 désactivé : contenu on-surface 38 %, conteneur on-surface 12 %. */
   disabledContent: string;
   disabledContainer: string;
-  primaryLight: string;
-  tertiaryLight: string;
 }
 
 /** `#rrggbb` + opacité → `#rrggbbaa`. */
@@ -42,10 +66,16 @@ export const withAlpha = (hex: string, alpha: number): string =>
 
 export const getRoles = (id: PaletteId, mode: ColorMode): M3Roles => PALETTES[id][mode];
 
+/** Équivalent de `KitColors.fromScheme` Flutter. */
 export function buildKitColors(roles: M3Roles, mode: ColorMode): KitColors {
   const light = mode === 'light';
   const a15 = (c: string) => withAlpha(c, 0.15);
   return {
+    primary: roles.primary,
+    primaryLight: withAlpha(roles.primary, light ? 0.08 : 0.14),
+    onPrimary: roles.onPrimary,
+    tertiary: roles.tertiary,
+    tertiaryLight: withAlpha(roles.tertiary, light ? 0.1 : 0.14),
     success: SEMANTIC.success,
     successLight: a15(SEMANTIC.success),
     successText: light ? '#15803d' : '#4ade80',
@@ -53,16 +83,26 @@ export function buildKitColors(roles: M3Roles, mode: ColorMode): KitColors {
     warning: SEMANTIC.warning,
     warningLight: a15(SEMANTIC.warning),
     warningText: light ? '#a16207' : '#fbbf24',
+    error: roles.error,
+    errorLight: withAlpha(roles.error, light ? 0.1 : 0.16),
+    errorText: light ? '#b91c1c' : '#f87171',
     info: SEMANTIC.info,
     infoLight: a15(SEMANTIC.info),
     purple: SEMANTIC.purple,
     purpleLight: a15(SEMANTIC.purple),
     cyan: SEMANTIC.cyan,
     cyanLight: a15(SEMANTIC.cyan),
-    errorText: light ? '#b91c1c' : '#f87171',
+    textPrimary: roles.onSurface,
+    textSecondary: roles.onSurfaceVariant,
+    textMuted: withAlpha(roles.onSurfaceVariant, light ? 0.7 : 0.65),
+    bg: roles.surface,
+    card: roles.surfaceContainerLow,
+    hover: roles.surfaceContainerHigh,
+    tableHeader: roles.surfaceContainer,
+    border: light ? '#00000014' : '#ffffff14',
+    divider: withAlpha(roles.outlineVariant, 0.45),
+    fieldBg: roles.surfaceContainerHigh,
     disabledContent: withAlpha(roles.onSurface, 0.38),
     disabledContainer: withAlpha(roles.onSurface, 0.12),
-    primaryLight: withAlpha(roles.primary, light ? 0.08 : 0.14),
-    tertiaryLight: withAlpha(roles.tertiary, light ? 0.1 : 0.14),
   };
 }

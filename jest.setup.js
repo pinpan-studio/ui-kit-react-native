@@ -5,8 +5,12 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 jest.mock('expo-haptics', () => ({ selectionAsync: jest.fn(() => Promise.resolve()) }));
 jest.mock('@expo/vector-icons', () => {
   const { Text } = require('react-native');
-  const Icon = ({ name }) => require('react').createElement(Text, null, name);
-  return { MaterialCommunityIcons: Icon };
+  const icon = () => {
+    const Icon = ({ name }) => require('react').createElement(Text, null, name);
+    Icon.font = {};
+    return Icon;
+  };
+  return { MaterialCommunityIcons: icon(), MaterialIcons: icon() };
 });
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => {
   const { Text } = require('react-native');
