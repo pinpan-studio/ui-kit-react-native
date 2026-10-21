@@ -4,11 +4,11 @@
  */
 
 /** Espace fine insécable : séparateur des milliers fr-FR. */
-export const NNBSP = ' ';
+export const NNBSP = '\u202f';
 /** Espace insécable. */
-export const NBSP = ' ';
+export const NBSP = '\u00a0';
 
-const MONTHS = [
+export const MONTHS = [
   'janvier',
   'février',
   'mars',
@@ -77,4 +77,47 @@ export function initials(name?: string | null): string {
     .map((p) => p[0])
     .join('')
     .toUpperCase();
+}
+
+/** `1,2 Mo`, `412 Ko`, `86 o` */
+export function fileSize(bytes: number): string {
+  if (bytes >= 1 << 20) return `${decimal1(bytes / (1 << 20))} Mo`;
+  if (bytes >= 1 << 10) return `${Math.round(bytes / (1 << 10))} Ko`;
+  return `${bytes} o`;
+}
+
+/** Jours de la semaine abrégés, du lundi au dimanche. */
+export const WEEKDAYS_SHORT = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
+
+/** `jeu. 24 oct.` — en-tête du sélecteur de date. */
+export const MONTHS_SHORT = [
+  'janv.',
+  'févr.',
+  'mars',
+  'avr.',
+  'mai',
+  'juin',
+  'juil.',
+  'août',
+  'sept.',
+  'oct.',
+  'nov.',
+  'déc.',
+];
+
+export function dayHeadline(d: Date): string {
+  return `${WEEKDAYS_SHORT[(d.getDay() + 6) % 7]} ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+}
+
+/** `08:30` */
+export const time = (h: number, m: number): string => `${pad(h)}:${pad(m)}`;
+
+/** Supprime accents et ligatures pour une recherche tolérante (`_fold` Flutter). */
+export function fold(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/œ/g, 'oe')
+    .replace(/’/g, "'");
 }

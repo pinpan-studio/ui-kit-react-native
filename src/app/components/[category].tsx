@@ -394,7 +394,7 @@ export default function CategoryPage() {
       </Page>
     );
   if (cat.id === 'typography') return <TypographyGallery key={section} initialSection={section} />;
-  if (cat.id === 'forms') return <FormsGallery />;
+  if (cat.id === 'forms') return <FormsGallery key={section} initialSection={section} />;
   if (cat.id === 'buttons') return <ButtonsGallery key={section} initialSection={section} />;
   if (cat.id === 'planning') return <PlanningGallery />;
   if (cat.id === 'media') return <MediaGallery />;
@@ -403,7 +403,7 @@ export default function CategoryPage() {
   if (cat.id === 'material') return <MaterialGallery />;
   if (cat.id === 'layout') return <LayoutGallery />;
   if (cat.id === 'navigation') return <NavigationGallery />;
-  if (cat.id === 'fields') return <FieldsGallery />;
+  if (cat.id === 'fields') return <FieldsGallery key={section} initialSection={section} />;
   if (cat.id === 'feedback') return <FeedbackGallery />;
   if (cat.id === 'data') return <DataGallery />;
   return (

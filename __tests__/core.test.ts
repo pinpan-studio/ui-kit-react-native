@@ -2,6 +2,13 @@ import { ago, compact, date, dateLong, decimal1, fcfa, NBSP, NNBSP, number } fro
 import { frenchTypography, revealSpaces } from '../src/core/frenchTypography';
 import { contrast } from '../src/theme/colors';
 
+describe('espaces spéciales', () => {
+  it('insécable U+00A0 et fine insécable U+202F', () => {
+    expect(NBSP.codePointAt(0)).toBe(0xa0);
+    expect(NNBSP.codePointAt(0)).toBe(0x202f);
+  });
+});
+
 describe('formats fr-FR (Fmt Flutter)', () => {
   it('nombres et montants avec espace fine insécable', () => {
     expect(number(1250000)).toBe(`1${NNBSP}250${NNBSP}000`);

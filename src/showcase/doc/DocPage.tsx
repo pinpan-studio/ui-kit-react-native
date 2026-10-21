@@ -63,7 +63,9 @@ export function DocPage({
   const offsets = useRef<Record<string, number>>({});
   const chips = useRef<Record<string, { x: number; width: number }>>({});
   const tocWidth = useRef(0);
-  const pendingInitial = useRef(initialSection);
+  /** Section à garder en haut tant que l'utilisateur n'a pas fait défiler la page lui-même :
+   * les sections au-dessus peuvent encore changer de hauteur après le premier rendu. */
+  const pinned = useRef(initialSection);
   const [active, setActive] = useState(sections[0]?.id);
   const [contentWidth, setContentWidth] = useState(0);
 
@@ -76,16 +78,14 @@ export function DocPage({
   const goTo = (id: string, animated = true) => {
     const y = offsets.current[id];
     if (y === undefined) return;
+    pinned.current = id;
     setActive(id);
     scroll.current?.scrollTo({ y: TOP_PADDING + y, animated });
   };
 
   const onSectionLayout = (id: string) => (e: LayoutChangeEvent) => {
     offsets.current[id] = e.nativeEvent.layout.y;
-    if (pendingInitial.current === id) {
-      pendingInitial.current = undefined;
-      requestAnimationFrame(() => goTo(id, false));
-    }
+    if (pinned.current === id) requestAnimationFrame(() => pinned.current === id && goTo(id, false));
   };
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -135,6 +135,7 @@ export function DocPage({
       <KeyboardSafe
         ref={scroll}
         onScroll={onScroll}
+        onScrollBeginDrag={() => (pinned.current = undefined)}
         scrollEventThrottle={32}
         contentContainerStyle={{ paddingHorizontal: pad, paddingTop: TOP_PADDING, paddingBottom: space.s12 }}
       >
