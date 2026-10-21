@@ -1,5 +1,5 @@
 export { buildTheme, type KitTheme } from './buildTheme';
-export { buildKitColors, mix, withAlpha, type ColorMode, type KitColors } from './colors';
+export { buildKitColors, contrast, mix, withAlpha, type ColorMode, type KitColors } from './colors';
 export { FONT_ASSETS, fontFamily, type FontRole, type FontWeight } from './fonts';
 export { PALETTES, PALETTE_META, PALETTE_ORDER, type M3Roles, type PaletteId } from './generated/palettes';
 export { KIT_TONES, toneColor, toneLight, toneText, type KitTone } from './tone';

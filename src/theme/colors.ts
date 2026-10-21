@@ -58,6 +58,10 @@ export interface KitColors {
   disabledContainer: string;
   /** Texte sur une teinte pleine (pastille compteur, overlay) : blanc. */
   onTone: string;
+  /** Bloc de code : toujours sombre (ardoise en clair, GitHub sombre en sombre), comme `CodeBlock` Flutter. */
+  codeBg: string;
+  codeFg: string;
+  codeMuted: string;
 }
 
 /** `#rrggbb` + opacité → `#rrggbbaa`. */
@@ -73,6 +77,21 @@ export function mix(fg: string, bg: string, alpha: number): string {
       .toString(16)
       .padStart(2, '0');
   return `#${channel(1)}${channel(3)}${channel(5)}`;
+}
+
+/** Rapport de contraste WCAG 2.1 ; une couleur `#rrggbbaa` est d'abord composée sur le fond. */
+export function contrast(fg: string, bg: string): number {
+  const alpha = fg.length === 9 ? parseInt(fg.slice(7), 16) / 255 : 1;
+  const lum = (hex: string) => {
+    const [r, g, b] = [1, 3, 5].map((i) => {
+      const v = parseInt(hex.slice(i, i + 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    }) as [number, number, number];
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const a = lum(mix(fg, bg, alpha));
+  const b = lum(bg);
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 }
 
 export const getRoles = (id: PaletteId, mode: ColorMode): M3Roles => PALETTES[id][mode];
@@ -116,5 +135,8 @@ export function buildKitColors(roles: M3Roles, mode: ColorMode): KitColors {
     disabledContent: withAlpha(roles.onSurface, 0.38),
     disabledContainer: withAlpha(roles.onSurface, 0.12),
     onTone: '#ffffff',
+    codeBg: light ? '#1e293b' : '#0d1117',
+    codeFg: '#e2e8f0',
+    codeMuted: '#94a3b8',
   };
 }

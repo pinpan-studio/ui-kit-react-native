@@ -5,6 +5,7 @@ import {
   MIN_TOUCH,
   elevation,
   font,
+  radius,
   space,
   toneColor,
   toneLight,
@@ -53,6 +54,40 @@ export function FilterChipButton({
             <Text style={[styles.countText, { color: active ? color : kit.textMuted }]}>{count}</Text>
           </View>
         )}
+      </View>
+    </TouchableRipple>
+  );
+}
+
+/**
+ * Puce M3 (`ChoiceChip` / `chipTheme` Flutter) : rayon 8, remplie sans contour (fond `fieldBg`),
+ * sélection en secondary-container.
+ */
+export function KitChip({
+  label,
+  selected = false,
+  onPress,
+  icon,
+}: {
+  label: string;
+  selected?: boolean;
+  onPress?: () => void;
+  icon?: string;
+}) {
+  const { kit, roles } = useKitTheme();
+  const color = selected ? roles.onSecondaryContainer : kit.textPrimary;
+  return (
+    <TouchableRipple
+      onPress={onPress}
+      borderless
+      hitSlop={{ top: 8, bottom: 8 }}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      style={[styles.kitChip, { backgroundColor: selected ? roles.secondaryContainer : kit.fieldBg }]}
+    >
+      <View style={styles.segmentRow}>
+        {icon ? <Icon source={icon} size={18} color={color} /> : null}
+        <Text style={[styles.kitChipLabel, { color }]}>{label}</Text>
       </View>
     </TouchableRipple>
   );
@@ -168,4 +203,12 @@ const styles = StyleSheet.create({
   segment: { borderRadius: 999, paddingVertical: space.s2, justifyContent: 'center' },
   segmentRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   segmentLabel: { ...font('600', 12.5), flexShrink: 1 },
+  kitChip: {
+    borderRadius: radius.sm,
+    minHeight: 32,
+    paddingHorizontal: space.s3,
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+  },
+  kitChipLabel: font('500', 13),
 });

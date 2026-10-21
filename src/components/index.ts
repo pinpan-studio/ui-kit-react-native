@@ -15,4 +15,14 @@ export { RoundIconButton, SplitButton, type SplitButtonItem } from './core/IconB
 export { KitProgressBar, LabeledDivider, PageHeader, ResponsiveGrid } from './core/Layout';
 export { Skeleton, SkeletonListTile } from './core/Skeleton';
 export { EmptyState, ErrorState } from './core/States';
-export { FilterChipButton, SegmentedToggle, ViewModeToggle, type SegmentOption, type ViewMode } from './core/Toggles';
+export {
+  FilterChipButton,
+  KitChip,
+  SegmentedToggle,
+  ViewModeToggle,
+  type SegmentOption,
+  type ViewMode,
+} from './core/Toggles';
+export { MarkdownView, markdownInline } from './display/MarkdownView';
+export { KitSlider } from './inputs/Slider';
+export { FormFieldLabel, KitTextField, type KitTextFieldProps } from './inputs/TextField';

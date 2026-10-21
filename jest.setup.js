@@ -17,3 +17,4 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => {
   const Icon = ({ name }) => require('react').createElement(Text, null, name);
   return { __esModule: true, default: Icon };
 });
+jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn(() => Promise.resolve(true)) }));

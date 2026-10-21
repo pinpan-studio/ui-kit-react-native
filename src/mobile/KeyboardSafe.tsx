@@ -1,10 +1,11 @@
-import type { ReactNode } from 'react';
+import type { ComponentRef, ReactNode, Ref } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, type ScrollViewProps } from 'react-native';
 
 interface Props extends ScrollViewProps {
   children: ReactNode;
   /** Barre d'actions collée en bas : elle remonte avec le clavier. */
   footer?: ReactNode;
+  ref?: Ref<ComponentRef<typeof ScrollView>>;
 }
 
 /**

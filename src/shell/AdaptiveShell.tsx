@@ -5,6 +5,7 @@ import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Appbar, BottomNavigation, Modal, Portal } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { SnackProvider } from '../core/snack';
 import { hapticToggle, KitIconButton, useBackClose } from '../mobile';
 import { categoryById } from '../showcase/kitNav';
 import { pageExampleBySlug } from '../showcase/pageExamples';
@@ -81,14 +82,14 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
         ) : null}
         <Appbar.Content title={titleFor(pathname)} titleStyle={{ fontFamily: theme.fonts.titleLarge.fontFamily }} />
         <KitIconButton
-          icon={theme.dark ? 'white-balance-sunny' : 'weather-night'}
+          icon={theme.dark ? 'white-balance-sunny' : 'mi:dark-mode'}
           accessibilityLabel={theme.dark ? 'Passer en mode clair' : 'Passer en mode sombre'}
           accessibilityHint={pref === 'system' ? 'Le mode suit actuellement le système' : undefined}
           onPress={toggleDark}
           testID="toggle-dark"
         />
         <KitIconButton
-          icon="palette-swatch-outline"
+          icon="palette-outline"
           accessibilityLabel="Choisir la palette et le mode"
           onPress={() => setPaletteOpen(true)}
           testID="open-palette"
@@ -112,7 +113,7 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
             (harnais || navMode !== 'bar') && { paddingBottom: insets.bottom },
           ]}
         >
-          {children}
+          <SnackProvider bottomInset={harnais || navMode !== 'bar' ? insets.bottom : 0}>{children}</SnackProvider>
         </View>
       </View>
 

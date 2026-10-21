@@ -385,7 +385,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 /** Galerie de démonstration native pour chaque catégorie et toutes ses sections. */
 export default function CategoryPage() {
-  const { category } = useLocalSearchParams<{ category: string }>();
+  const { category, section } = useLocalSearchParams<{ category: string; section?: string }>();
   const cat = categoryById(String(category));
   if (!cat)
     return (
@@ -393,9 +393,9 @@ export default function CategoryPage() {
         <Text variant="bodyLarge">Catégorie inconnue.</Text>
       </Page>
     );
-  if (cat.id === 'typography') return <TypographyGallery />;
+  if (cat.id === 'typography') return <TypographyGallery key={section} initialSection={section} />;
   if (cat.id === 'forms') return <FormsGallery />;
-  if (cat.id === 'buttons') return <ButtonsGallery />;
+  if (cat.id === 'buttons') return <ButtonsGallery key={section} initialSection={section} />;
   if (cat.id === 'planning') return <PlanningGallery />;
   if (cat.id === 'media') return <MediaGallery />;
   if (cat.id === 'maps') return <MapsGallery />;
