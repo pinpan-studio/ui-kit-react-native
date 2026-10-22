@@ -252,7 +252,6 @@ function Welcome({ store }: { store: HarnaisStore }) {
 
 function ConversationList({ store, onOpen }: { store: HarnaisStore; onOpen: (id: string | null) => void }) {
   const { kit } = useKitTheme();
-  const insets = useSafeAreaInsets();
   const conversations = useStore(store, (s) => s.conversations);
   const activeId = useStore(store, (s) => s.activeId);
   const [q, setQ] = useState('');
@@ -320,7 +319,7 @@ function ConversationList({ store, onOpen }: { store: HarnaisStore; onOpen: (id:
   };
 
   return (
-    <View style={[styles.fill, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <View style={styles.fill}>
       <View style={[styles.row, styles.drawerHead]}>
         <Icon source="mi:auto-awesome" size={24} color={kit.tertiary} />
         <Text style={[font('700', 18, 'brand'), styles.fill, { color: kit.textPrimary }]}>Harnais</Text>

@@ -426,8 +426,6 @@ const P = {
   koffi: { name: 'Koffi N’Guessan', color: '#0891b2', role: 'Technicien' },
   fatou: { name: 'Fatou Diabaté', color: '#7c3aed', role: 'Juridique' },
 } satisfies Record<string, Person>;
-export const ME: Person = P.me;
-export const PEOPLE: Person[] = [P.me, P.aya, P.marc, P.grace, P.ibrahim, P.nadia];
 
 /** Bloc d'article ; le texte garde le Markdown en ligne de la source. */
 export type ArticleBlock =

@@ -2,9 +2,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import { Appbar, BottomNavigation, Modal, Portal } from 'react-native-paper';
+import { Appbar, BottomNavigation } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ModalDrawer } from '../components';
 import { SnackProvider } from '../core/snack';
 import { hapticToggle, KitIconButton, useBackClose } from '../mobile';
 import { categoryById } from '../showcase/kitNav';
@@ -107,7 +108,7 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
         {navMode === 'rail' && <NavRail index={index} onSelect={select} insetLeft={insets.left} />}
         {navMode === 'drawer' && (
           <View
-            style={[styles.panel, { paddingLeft: insets.left, backgroundColor: theme.roles.surfaceContainerLow }]}
+            style={[styles.panel, { paddingLeft: insets.left, backgroundColor: theme.kit.card }]}
             testID="side-panel"
           >
             <NavPanel />
@@ -149,19 +150,9 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
         />
       )}
 
-      <Portal>
-        <Modal
-          visible={drawerOpen}
-          onDismiss={closeDrawer}
-          style={styles.drawerModal}
-          contentContainerStyle={[
-            styles.drawer,
-            { backgroundColor: theme.roles.surfaceContainerLow, paddingTop: insets.top, paddingBottom: insets.bottom },
-          ]}
-        >
-          <NavPanel onNavigate={closeDrawer} />
-        </Modal>
-      </Portal>
+      <ModalDrawer visible={drawerOpen} onDismiss={closeDrawer}>
+        <NavPanel onNavigate={closeDrawer} />
+      </ModalDrawer>
       <PaletteSheet visible={paletteOpen} onDismiss={closePalette} />
     </View>
   );
@@ -171,6 +162,4 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   row: { flexDirection: 'row' },
   panel: { width: 280 },
-  drawerModal: { justifyContent: 'flex-start', alignItems: 'flex-start', margin: 0 },
-  drawer: { width: 300, maxWidth: '85%', height: '100%', borderTopRightRadius: 16, borderBottomRightRadius: 16 },
 });

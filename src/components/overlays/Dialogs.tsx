@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Icon, TouchableRipple } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { KitIconButton } from '../../mobile/KitIconButton';
@@ -340,6 +340,7 @@ export function SidePanel({
   children: ReactNode;
 }) {
   const { kit, roles } = useKitTheme();
+  const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const head = (
     <View style={styles.panelHead}>
@@ -373,9 +374,20 @@ export function SidePanel({
           accessibilityLabel="Fermer"
           style={[StyleSheet.absoluteFill, { backgroundColor: withAlpha(roles.scrim, 0.32) }]}
         />
-        <SafeAreaView accessibilityViewIsModal style={[styles.panel, { backgroundColor: roles.surfaceContainerLow }]}>
+        <View
+          accessibilityViewIsModal
+          style={[
+            styles.panel,
+            {
+              backgroundColor: kit.card,
+              paddingTop: insets.top,
+              paddingBottom: insets.bottom,
+              paddingRight: insets.right,
+            },
+          ]}
+        >
           {body}
-        </SafeAreaView>
+        </View>
       </View>
     </Modal>
   );
@@ -391,7 +403,9 @@ export function ModalDrawer({
   onDismiss: () => void;
   children: ReactNode;
 }) {
-  const { roles } = useKitTheme();
+  const { kit, roles } = useKitTheme();
+  // Insets explicites : dans une Modal native, SafeAreaView ne reçoit pas les marges (iOS).
+  const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onDismiss}>
       <View style={styles.fill}>
@@ -401,9 +415,20 @@ export function ModalDrawer({
           accessibilityLabel="Fermer le menu"
           style={[StyleSheet.absoluteFill, { backgroundColor: withAlpha(roles.scrim, 0.32) }]}
         />
-        <SafeAreaView accessibilityViewIsModal style={[styles.drawer, { backgroundColor: roles.surfaceContainerLow }]}>
+        <View
+          accessibilityViewIsModal
+          style={[
+            styles.drawer,
+            {
+              backgroundColor: kit.card,
+              paddingTop: insets.top,
+              paddingBottom: insets.bottom,
+              paddingLeft: insets.left,
+            },
+          ]}
+        >
           {children}
-        </SafeAreaView>
+        </View>
       </View>
     </Modal>
   );
@@ -426,9 +451,10 @@ export function FullscreenDialog({
   children: ReactNode;
 }) {
   const { kit } = useKitTheme();
+  const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} animationType="slide" statusBarTranslucent onRequestClose={onDismiss}>
-      <SafeAreaView style={[styles.fill, { backgroundColor: kit.bg }]}>
+      <View style={[styles.fill, { backgroundColor: kit.bg, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.fullBar}>
           <KitIconButton icon="mi:close" accessibilityLabel="Fermer" iconColor={kit.textPrimary} onPress={onDismiss} />
           <Text accessibilityRole="header" style={[styles.fullTitle, { color: kit.textPrimary }]}>
@@ -441,7 +467,7 @@ export function FullscreenDialog({
           ) : null}
         </View>
         <ScrollView contentContainerStyle={styles.fullBody}>{children}</ScrollView>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 }

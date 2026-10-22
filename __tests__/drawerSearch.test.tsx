@@ -57,6 +57,17 @@ describe('NavPanel : champ « Rechercher un composant… »', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/components/fields?section=signature');
   });
 
+  it('déplie une catégorie et ouvre une de ses sections', async () => {
+    await renderPanel();
+    expect(screen.getByText('COMPOSANTS')).toBeTruthy();
+    expect(screen.queryByLabelText('Signature, dans Champs avancés')).toBeNull();
+    await fireEvent.press(screen.getByLabelText('Champs avancés'));
+    await fireEvent.press(screen.getByLabelText('Signature, dans Champs avancés'));
+    expect(mockNavigate).toHaveBeenCalledWith('/components/fields?section=signature');
+    await fireEvent.press(screen.getByLabelText('Harnais (assistant IA)'));
+    expect(mockNavigate).toHaveBeenCalledWith('/harnais');
+  });
+
   it('affiche un état vide', async () => {
     await renderPanel();
     await fireEvent.changeText(screen.getByLabelText('Rechercher un composant'), 'xyzzy');

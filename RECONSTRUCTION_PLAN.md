@@ -4,17 +4,12 @@ Référence visuelle et fonctionnelle : `/Users/MAC/UIX/ui-kit-flutter` (applica
 Le but est une adaptation React Native native — même design system, mêmes composants, mêmes états — pas une copie
 du code Flutter.
 
-## État réel — 21 octobre 2026
+## État — 22 octobre 2026
 
-- **Conservé** : Expo Router, shell adaptatif (barre / rail / panneau), recherche du tiroir, `kitNav.ts` (mêmes
-  identifiants que `kit_nav.dart`), 41 palettes générées depuis Angular, store persisté, règles mobiles
-  (`KitIconButton`, `useBackClose`, `KeyboardSafe`, `Decorative`) et leurs tests.
-- **Première passe à reprendre** : les 13 galeries, pages, layouts et Harnais existent mais utilisent Paper brut,
-  sans couche de composants du kit, avec couleurs codées en dur et cartes à contour. Ils ne sont pas encore
-  conformes visuellement à Flutter.
-- **Manques du socle** : échelle `KitText`, `KitColors` complet (textes, fonds, bordures, `fieldBg`…), `KitTone`,
-  formes des composants (boutons pilule 40 dp, champs remplis rayon 12, cartes sans contour rayon 24), polices
-  TT Wellingtons et graisses 300 / 800, Material Icons, points de rupture et colonnes Flutter.
+Les étapes 0 à 10 sont terminées sur `feat/flutter-parity` : design system, composants du kit, système de
+documentation, 13 galeries, Showcase, gabarits, pages d'exemple (applications, authentification, formulaires),
+Showcases et Harnais (33 widgets). Chaque étape a été vérifiée par typecheck, lint, Prettier, Jest, export Android
+et comparaison de captures avec les goldens Flutter.
 
 ## Étapes
 
@@ -36,7 +31,8 @@ du code Flutter.
 
 - Grand écran : rail 600–840 dp et panneau ≥ 840 dp (Material 3) conservés, écart documenté dans le README.
 - Graphiques : `react-native-svg`, sans bibliothèque de graphiques supplémentaire.
-- Studio de thème : porté à l'étape 7.
+- Studio de thème : non porté ; la feuille « Apparence » couvre le choix de palette et de mode.
+- Showcases : écrans à la taille réelle de l'appareil, sans sélecteur de cadre.
 
 ## Règles de parité
 

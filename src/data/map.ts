@@ -2,8 +2,6 @@ import type { MapMarkerData, MapRouteData, MapZoneData } from '../components/map
 import type { KitTone } from '../theme';
 
 /** Données géographiques statiques (Abidjan et environs). */
-export const ABIDJAN = { lat: 5.33, lng: -4.01 };
-
 export const FLOTTE: MapMarkerData[] = [
   {
     id: 'v1',

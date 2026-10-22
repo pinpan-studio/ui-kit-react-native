@@ -1,13 +1,16 @@
-import { Link } from 'expo-router';
-import { Text } from 'react-native-paper';
+import { router } from 'expo-router';
 
-import { Page } from '../shell/Page';
+import { EmptyState } from '../components';
 
 export default function NotFound() {
   return (
-    <Page>
-      <Text variant="titleLarge">Page introuvable</Text>
-      <Link href="/">Retour à l’accueil</Link>
-    </Page>
+    <EmptyState
+      icon="mi:explore-off"
+      title="Page introuvable"
+      subtitle="Cette adresse ne correspond à aucun écran du kit."
+      actionLabel="Retour à l’accueil"
+      actionIcon="mi:home"
+      onAction={() => router.navigate('/')}
+    />
   );
 }

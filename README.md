@@ -40,13 +40,17 @@ scripts/
   source/                 exports Angular (palettes, tokens, routes) + paletteMeta
   generate-theme.mjs      JSON → TypeScript typé, sans recalcul de couleurs
 src/
-  app/                    routes Expo Router (Showcase, Composants, Layouts, Harnais)
-  theme/                  ≈ lib/theme Flutter : tokens, palettes générées, buildTheme, polices
+  app/                    routes Expo Router : Showcase, Composants (13 galeries), Layouts, Pages, Showcases, Harnais
+  theme/                  ≈ lib/theme Flutter : KitColors, KitTone, KitText, jetons, palettes générées, swatches
+  components/             ≈ lib/widgets : composants du kit (base, champs, données, planning, cartes, médias…)
+  core/                   formats français, typographie, snackbar / presse-papiers
+  data/                   données de démonstration statiques (flotte, médias, exemples)
   store/                  préférences de thème (zustand persisté)
-  shell/                  ≈ lib/showcase/kit_shell : navigation adaptative, app bar, feuille de palettes
-  showcase/               ≈ lib/showcase/kit_nav : catalogue des 13 catégories
+  shell/                  ≈ kit_shell : navigation adaptative, app bar, apparence (palettes, mode)
+  showcase/               ≈ lib/showcase : DocPage, galeries, gabarits (layouts), pages d'exemple (examples)
+  harnais/                ≈ lib/harnais : modèle, catalogue de scénarios, store de génération simulée, 33 widgets
   mobile/                 règles mobiles : cible 48 dp, haptique, retour Android, clavier, décoratif
-__tests__/                tests du thème et du shell
+__tests__/                thème, shell, composants, galeries, exemples, Harnais, garde-fous (couleurs en dur)
 ```
 
 ## Thème
@@ -74,8 +78,17 @@ __tests__/                tests du thème et du shell
 - **600–840 dp** : rail de navigation ; **≥ 840 dp** : panneau latéral permanent. Ces seuils sont les
   classes de largeur _compact / medium / expanded_ de Material 3. Flutter garde la barre du bas à
   toutes les largeurs ; on suit ici Material 3 pour les tablettes et l'orientation paysage.
-- **Harnais** : comme `kit_shell.dart`, toute la navigation est masquée ; le bouton « Quitter le
-  harnais » (✕, 48 dp) ou le retour Android ramènent à la destination précédente.
+- **Harnais** : comme dans Flutter, il s'affiche en plein écran avec sa propre barre ; « Retour au
+  catalogue » (menu ⋮) ou le retour Android ramènent à la destination précédente. `/harnais?c=<id>`
+  ouvre directement une conversation (`/harnais/:id` Flutter).
+
+## Autres adaptations assumées
+
+- **Showcases** : la visionneuse affiche chaque écran à la taille réelle de l'appareil, sans sélecteur
+  de cadre (React Native ne permet pas de simuler une autre largeur de fenêtre pour les composants).
+- **Studio de thème** : non porté ; la feuille « Apparence » (41 palettes, mode clair / sombre / système)
+  couvre le choix du thème.
+- **Harnais** : réponses entièrement simulées en local, comme dans Flutter ; aucun appel réseau.
 
 ## APK de test, sans compte Expo
 
