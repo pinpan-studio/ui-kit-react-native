@@ -91,3 +91,7 @@ Signature : la clé de test (`.jks` / `.keystore`) et ses mots de passe restent 
 (par ex. `~/.android-keys/` et variables d'environnement ou `~/.gradle/gradle.properties`).
 `.gitignore` exclut `*.jks`, `*.keystore`, `keystore.properties` et `android/`.
 Aucun secret ne doit figurer dans le code ni dans la documentation.
+
+## Écart volontaire avec ui-kit-flutter : retour haptique
+
+Les bascules segmentées, les puces de filtre et la navigation déclenchent un retour haptique discret (Flutter n'en a pas dans Boutons). Validé par The Chief. Il passe par l'API système (`performAndroidHapticsAsync(Segment_Tick)` sur Android, `selectionAsync` sur iOS) et respecte donc le réglage « retour tactile » de l'appareil.

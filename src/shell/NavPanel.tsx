@@ -1,13 +1,14 @@
 import { router, usePathname } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Drawer, Searchbar, Text } from 'react-native-paper';
+import { Drawer, List, Searchbar, Text } from 'react-native-paper';
 
 import { KIT_CATEGORIES } from '../showcase/kitNav';
 import { searchCatalog } from '../showcase/search';
 import { MIN_TOUCH, space } from '../theme/tokens';
 import { useKitTheme } from '../theme/useKitTheme';
-import { activeIndex, DESTINATIONS } from './destinations';
+import { activeIndex } from './destinations';
+import { DRAWER_ENTRIES, EXTRA_PATHS } from './drawerEntries';
 
 /** Contenu du panneau latéral (permanent > 840 dp, ou tiroir modal) : destinations + catégories. */
 export function NavPanel({ onNavigate }: { onNavigate?: () => void }) {
@@ -17,6 +18,8 @@ export function NavPanel({ onNavigate }: { onNavigate?: () => void }) {
   const [query, setQuery] = useState('');
   const hits = searchCatalog(query);
   const searching = query.trim().length > 0;
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const extraActive = EXTRA_PATHS.includes(pathname);
   const go = (href: string) => {
     router.navigate(href as never);
     onNavigate?.();
@@ -78,31 +81,47 @@ export function NavPanel({ onNavigate }: { onNavigate?: () => void }) {
       ) : (
         <>
           <Drawer.Section showDivider>
-            {DESTINATIONS.map((d, i) => (
-              <Drawer.Item
-                key={d.key}
-                label={d.label}
-                icon={i === current ? d.activeIcon : d.icon}
-                active={i === current}
-                onPress={() => go(d.href)}
-                style={styles.item}
-                accessibilityLabel={d.label}
-              />
-            ))}
+            {DRAWER_ENTRIES.map((e) => {
+              const active = e.destIndex !== undefined ? e.destIndex === current && !extraActive : pathname === e.href;
+              return (
+                <Drawer.Item
+                  key={e.href}
+                  label={e.label}
+                  icon={e.icon}
+                  active={active}
+                  onPress={() => go(e.href)}
+                  style={styles.item}
+                  accessibilityLabel={e.label}
+                  testID={`drawer-${e.key}`}
+                />
+              );
+            })}
           </Drawer.Section>
-          <Drawer.Section title="Composants" showDivider={false}>
-            {KIT_CATEGORIES.map((c) => (
-              <Drawer.Item
-                key={c.id}
-                label={c.label}
-                icon={c.icon}
-                active={pathname === `/components/${c.id}`}
-                onPress={() => go(`/components/${c.id}`)}
-                style={styles.item}
-                accessibilityLabel={c.label}
-              />
-            ))}
-          </Drawer.Section>
+          <Text variant="labelSmall" style={[styles.overline, { color: theme.colors.onSurfaceVariant }]}>
+            COMPOSANTS
+          </Text>
+          {KIT_CATEGORIES.map((c) => (
+            <List.Accordion
+              key={c.id}
+              title={c.label}
+              left={(p) => <List.Icon {...p} icon={c.icon} />}
+              expanded={expanded === c.id}
+              onPress={() => setExpanded((x) => (x === c.id ? null : c.id))}
+              style={styles.item}
+              accessibilityLabel={`${c.label}, ${c.sections.length} sections`}
+              testID={`drawer-cat-${c.id}`}
+            >
+              {c.sections.map((s) => (
+                <List.Item
+                  key={s.id}
+                  title={s.label}
+                  onPress={() => go(`/components/${c.id}?section=${s.id}`)}
+                  style={[styles.item, styles.sub]}
+                  accessibilityLabel={`${s.label}, dans ${c.label}`}
+                />
+              ))}
+            </List.Accordion>
+          ))}
         </>
       )}
     </ScrollView>
@@ -117,5 +136,7 @@ const styles = StyleSheet.create({
   indent: { marginLeft: space.s6 },
   search: { marginHorizontal: space.s3, marginBottom: space.s2, minHeight: MIN_TOUCH },
   searchInput: { minHeight: MIN_TOUCH },
+  overline: { paddingHorizontal: space.s4, paddingTop: space.s4, paddingBottom: space.s2, letterSpacing: 1 },
+  sub: { paddingLeft: space.s8 },
   empty: { padding: space.s6, textAlign: 'center' },
 });

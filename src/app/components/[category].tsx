@@ -1,26 +1,31 @@
 import { useLocalSearchParams } from 'expo-router';
-import { List, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 
 import { Page } from '../../shell/Page';
+import { ButtonsGallery } from '../../showcase/components/ButtonsGallery';
+import { DocPage } from '../../showcase/doc/DocPage';
 import { categoryById } from '../../showcase/kitNav';
 
-/** Galerie d'une catégorie : sections listées, composants livrés à l'étape 2. */
+/** Galerie d'une catégorie ; `?section=<id>` fait défiler jusqu'à la section. */
 export default function CategoryPage() {
-  const { category } = useLocalSearchParams<{ category: string }>();
+  const { category, section } = useLocalSearchParams<{ category: string; section?: string }>();
   const cat = categoryById(String(category));
-  if (!cat)
+  const initial = typeof section === 'string' ? section : undefined;
+  if (!cat) {
     return (
       <Page>
         <Text variant="bodyLarge">Catégorie inconnue.</Text>
       </Page>
     );
+  }
+  if (cat.id === 'buttons') return <ButtonsGallery initialSection={initial} />;
   return (
-    <Page testID={`category-${cat.id}`}>
-      <Text variant="bodyLarge">{cat.description}</Text>
-      <Text variant="bodySmall">Composants à venir à l’étape 2.</Text>
-      {cat.sections.map((s) => (
-        <List.Item key={s.id} title={s.label} left={(p) => <List.Icon {...p} icon="circle-small" />} />
-      ))}
-    </Page>
+    <DocPage
+      testID={`category-${cat.id}`}
+      title={cat.label}
+      subtitle={cat.description}
+      initialSection={initial}
+      sections={cat.sections.map((s) => ({ id: s.id, title: s.label, description: 'Composants à venir.' }))}
+    />
   );
 }
