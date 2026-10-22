@@ -12,13 +12,30 @@ import { useKitTheme } from '../theme/useKitTheme';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-/** Pile de routes au fond du thème (sinon le fond clair par défaut de la navigation reste visible en sombre). */
+/** Racines des onglets de la barre du bas : on passe de l'une à l'autre en fondu, sans glissement. */
+const TAB_ROOTS = ['index', 'components/index', 'layouts/index', 'harnais'] as const;
+
+/**
+ * Pile de routes au fond du thème (sinon le fond clair par défaut de la navigation reste visible en sombre).
+ * Pages de détail : transition native de la plateforme (glissement et retour au bord sur iOS) ;
+ * racines d'onglet : fondu, comme un changement d'onglet.
+ */
 function ThemedStack() {
   const { colors } = useKitTheme();
   return (
     <Stack
-      screenOptions={{ headerShown: false, animation: 'fade', contentStyle: { backgroundColor: colors.background } }}
-    />
+      screenOptions={{
+        headerShown: false,
+        animation: 'default',
+        gestureEnabled: true,
+        fullScreenGestureEnabled: true,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    >
+      {TAB_ROOTS.map((name) => (
+        <Stack.Screen key={name} name={name} options={{ animation: 'fade' }} />
+      ))}
+    </Stack>
   );
 }
 

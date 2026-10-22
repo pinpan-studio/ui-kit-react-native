@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Appbar, BottomNavigation } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,10 +10,12 @@ import { SnackProvider } from '../core/snack';
 import { hapticToggle, KitIconButton, useBackClose } from '../mobile';
 import { categoryById } from '../showcase/kitNav';
 import { useThemeStore } from '../store/themeStore';
+import { font } from '../theme/typography';
 import { useKitTheme } from '../theme/useKitTheme';
 import { activeIndex, DESTINATIONS, navModeFor } from './destinations';
 import { NavPanel } from './NavPanel';
 import { NavRail } from './NavRail';
+import { emitTabReselect } from './tabReselect';
 import { PaletteSheet } from './PaletteSheet';
 
 /** Sortie d'un écran immersif (Harnais) : retour à la dernière destination du shell. */
@@ -61,9 +63,21 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
   const closePalette = useCallback(() => setPaletteOpen(false), []);
   useBackClose(drawerOpen, closeDrawer);
 
+  // Dernière page de chaque onglet : un onglet retrouve sa page en cours (comme les piles par onglet Flutter).
+  const lastPath = useRef<Record<number, string>>({});
+  useEffect(() => {
+    lastPath.current[index] = pathname;
+  }, [index, pathname]);
   const select = (i: number) => {
     const d = DESTINATIONS[i];
-    if (d) router.navigate(d.href);
+    if (!d) return;
+    if (i !== index) {
+      router.navigate((lastPath.current[i] ?? d.href) as never);
+      return;
+    }
+    // Onglet actif touché à nouveau : retour à sa racine, ou en haut de la page s'il y est déjà.
+    if (pathname !== d.href) router.navigate(d.href);
+    else emitTabReselect(d.href);
   };
   const toggleDark = () => {
     hapticToggle();
@@ -142,6 +156,12 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
             hapticToggle();
             select(DESTINATIONS.findIndex((d) => d.key === route.key));
           }}
+          renderLabel={({ route, focused, color }) => (
+            // Libellé actif en gras, comme la NavigationBar Flutter.
+            <Text style={[font(focused ? '700' : '500', 12), styles.tabLabel, { color }]} numberOfLines={1}>
+              {DESTINATIONS.find((x) => x.key === route.key)?.label}
+            </Text>
+          )}
           renderIcon={({ route, focused, color }) => {
             const d = DESTINATIONS.find((x) => x.key === route.key);
             return d ? <MaterialCommunityIcons name={focused ? d.activeIcon : d.icon} size={24} color={color} /> : null;
@@ -162,4 +182,5 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   row: { flexDirection: 'row' },
   panel: { width: 280 },
+  tabLabel: { textAlign: 'center' },
 });

@@ -420,7 +420,7 @@ export function KitMap({
         : null}
 
       <View style={[styles.attribution, { backgroundColor: withAlpha(kit.card, 0.8) }]} pointerEvents="none">
-        <Text style={[font('400', 10.5), { color: kit.textSecondary }]}>{attributionOf(bm)}</Text>
+        <Text style={[font('400', 11), { color: kit.textSecondary }]}>{attributionOf(bm)}</Text>
       </View>
 
       <View style={styles.controls}>

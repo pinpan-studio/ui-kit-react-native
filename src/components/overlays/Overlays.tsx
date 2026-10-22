@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import {
   Animated,
-  Easing,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -12,12 +11,17 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { KitIconButton } from '../../mobile/KitIconButton';
+import { useSheetGesture } from '../../mobile/useSheetGesture';
 import { font, radius, space, useKitTheme, withAlpha } from '../../theme';
 import { KitButton } from '../core/Button';
+
+/** Hauteur, depuis le haut d'une feuille, où le glissé vers le bas la ferme en priorité. */
+const GRAB_ZONE = 80;
 
 /** Fond assombri commun : touche pour fermer, ignoré des lecteurs d'écran sauf comme action « Fermer ». */
 function Scrim({ onPress }: { onPress?: () => void }) {
@@ -59,81 +63,92 @@ export function KitBottomSheet({
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const [ratio, setRatio] = useState(resizable?.initial ?? 0);
+  const [sheetH, setSheetH] = useState(height * (resizable?.initial ?? maxHeightRatio));
   const dragStart = useRef<{ y: number; ratio: number } | null>(null);
   const [wasVisible, setWasVisible] = useState(visible);
   if (visible !== wasVisible) {
     setWasVisible(visible);
     if (visible && resizable) setRatio(resizable.initial);
   }
-  const [slide] = useState(() => new Animated.Value(1));
-  useEffect(() => {
-    if (!visible) return;
-    slide.setValue(1);
-    Animated.timing(slide, {
-      toValue: 0,
-      duration: 250,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-  }, [visible, slide]);
-  const translateY = slide.interpolate({ inputRange: [0, 1], outputRange: [0, height * 0.4] });
+  const sheet = useSheetGesture({
+    visible,
+    onDismiss,
+    distance: sheetH + insets.bottom,
+    // Poignée et en-tête (≈ 80 dp) ; une feuille extensible garde le glissé de sa poignée.
+    grabZone: (y) => !resizable && y <= GRAB_ZONE,
+  });
   return (
     <Modal
-      visible={visible}
+      visible={sheet.mounted}
       transparent
-      animationType="fade"
+      animationType="none"
       statusBarTranslucent
       navigationBarTranslucent
-      onRequestClose={onDismiss}
+      onRequestClose={sheet.close}
     >
-      <KeyboardAvoidingView style={styles.end} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <Scrim onPress={onDismiss} />
-        <Animated.View
-          testID={testID}
-          accessibilityViewIsModal
-          style={[
-            styles.sheet,
-            {
-              backgroundColor: roles.surfaceContainerLow,
-              ...(resizable
-                ? { height: height * ratio + insets.bottom }
-                : { maxHeight: height * maxHeightRatio + insets.bottom }),
-              paddingBottom: insets.bottom,
-              transform: [{ translateY }],
-            },
-          ]}
-        >
-          {handle ? (
-            <View
-              style={styles.handleArea}
-              accessible={!!resizable}
-              accessibilityRole={resizable ? 'adjustable' : undefined}
-              accessibilityLabel={resizable ? 'Hauteur de la feuille' : undefined}
-              accessibilityActions={resizable ? [{ name: 'increment' }, { name: 'decrement' }] : undefined}
-              onAccessibilityAction={(e) =>
-                resizable && setRatio(e.nativeEvent.actionName === 'increment' ? resizable.max : resizable.min)
-              }
-              onStartShouldSetResponder={() => !!resizable}
-              onMoveShouldSetResponder={() => !!resizable}
-              onResponderGrant={(e) => {
-                dragStart.current = { y: e.nativeEvent.pageY, ratio };
-              }}
-              onResponderMove={(e) => {
-                if (!resizable || !dragStart.current) return;
-                const next = dragStart.current.ratio - (e.nativeEvent.pageY - dragStart.current.y) / height;
-                if (next < resizable.min - 0.08) onDismiss();
-                else setRatio(Math.min(resizable.max, Math.max(resizable.min, next)));
-              }}
-              onResponderRelease={() => {
-                dragStart.current = null;
-              }}
+      <GestureHandlerRootView style={styles.fill}>
+        <KeyboardAvoidingView style={styles.end} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <Animated.View style={[StyleSheet.absoluteFill, { opacity: sheet.scrim }]}>
+            <Scrim onPress={sheet.close} />
+          </Animated.View>
+          <GestureDetector gesture={sheet.gesture}>
+            <Animated.View
+              testID={testID}
+              accessibilityViewIsModal
+              onLayout={(e) => setSheetH(e.nativeEvent.layout.height)}
+              style={[
+                styles.sheet,
+                {
+                  backgroundColor: roles.surfaceContainerLow,
+                  ...(resizable
+                    ? { height: height * ratio + insets.bottom }
+                    : { maxHeight: height * maxHeightRatio + insets.bottom }),
+                  paddingBottom: insets.bottom,
+                  transform: [{ translateY: sheet.offset }],
+                },
+              ]}
             >
-              <View style={[styles.handle, { backgroundColor: withAlpha(roles.onSurfaceVariant, 0.4) }]} />
-            </View>
-          ) : null}
-          {children}
-        </Animated.View>
-      </KeyboardAvoidingView>
+              {handle ? (
+                resizable ? (
+                  <View
+                    style={styles.handleArea}
+                    accessible
+                    accessibilityRole="adjustable"
+                    accessibilityLabel="Hauteur de la feuille"
+                    accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+                    onAccessibilityAction={(e) =>
+                      setRatio(e.nativeEvent.actionName === 'increment' ? resizable.max : resizable.min)
+                    }
+                    onStartShouldSetResponder={() => true}
+                    onMoveShouldSetResponder={() => true}
+                    onResponderGrant={(e) => {
+                      dragStart.current = { y: e.nativeEvent.pageY, ratio };
+                    }}
+                    onResponderMove={(e) => {
+                      if (!dragStart.current) return;
+                      const next = dragStart.current.ratio - (e.nativeEvent.pageY - dragStart.current.y) / height;
+                      if (next < resizable.min - 0.08) {
+                        dragStart.current = null;
+                        sheet.close();
+                      } else setRatio(Math.min(resizable.max, Math.max(resizable.min, next)));
+                    }}
+                    onResponderRelease={() => {
+                      dragStart.current = null;
+                    }}
+                  >
+                    <View style={[styles.handle, { backgroundColor: withAlpha(roles.onSurfaceVariant, 0.4) }]} />
+                  </View>
+                ) : (
+                  <View style={styles.handleArea}>
+                    <View style={[styles.handle, { backgroundColor: withAlpha(roles.onSurfaceVariant, 0.4) }]} />
+                  </View>
+                )
+              ) : null}
+              {children}
+            </Animated.View>
+          </GestureDetector>
+        </KeyboardAvoidingView>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

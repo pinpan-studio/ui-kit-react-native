@@ -1,9 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { useRef } from 'react';
 import { Pressable, Text } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { navModeFor } from '../src/shell/destinations';
 import { AdaptiveShell, useShellExit } from '../src/shell/AdaptiveShell';
+import { useScrollToTopOnReselect } from '../src/shell/tabReselect';
 import { useThemeStore } from '../src/store/themeStore';
 import { KitThemeProvider } from '../src/theme/KitThemeProvider';
 
@@ -118,5 +120,62 @@ describe('AdaptiveShell', () => {
     await renderShell();
     expect(screen.queryByTestId('side-panel')).toBeNull();
     expect(screen.getByTestId('adaptive-shell-immersive')).toBeTruthy();
+  });
+});
+
+// Mêmes parcours que `test/navigation_test.dart` du kit Flutter.
+// En rail (700 dp) : même `select` que la barre du bas, dont la pression n'est pas simulable
+// dans l'environnement de test de react-native-paper.
+describe('navigation par onglets', () => {
+  beforeEach(() => {
+    mockWidth = 700;
+  });
+
+  const shell = () => (
+    <SafeAreaProvider initialMetrics={metrics}>
+      <KitThemeProvider>
+        <AdaptiveShell>
+          <Text>Contenu</Text>
+        </AdaptiveShell>
+      </KitThemeProvider>
+    </SafeAreaProvider>
+  );
+
+  it('chaque onglet retrouve sa page en cours', async () => {
+    mockPath = '/components/forms';
+    const view = await render(shell());
+    mockPath = '/layouts';
+    await view.rerender(shell());
+    await fireEvent.press(screen.getByLabelText('Composants'));
+    expect(mockNavigate).toHaveBeenLastCalledWith('/components/forms');
+  });
+
+  it('onglet actif touché à nouveau : retour à la racine de l’onglet', async () => {
+    mockPath = '/components/forms';
+    await render(shell());
+    await fireEvent.press(screen.getByLabelText('Composants'));
+    expect(mockNavigate).toHaveBeenLastCalledWith('/components');
+  });
+
+  it('onglet actif à sa racine touché à nouveau : la page remonte en haut', async () => {
+    const scrollTo = jest.fn();
+    function RootPage() {
+      const ref = useRef({ scrollTo });
+      useScrollToTopOnReselect(ref);
+      return <Text>Page racine</Text>;
+    }
+    mockPath = '/components';
+    await render(
+      <SafeAreaProvider initialMetrics={metrics}>
+        <KitThemeProvider>
+          <AdaptiveShell>
+            <RootPage />
+          </AdaptiveShell>
+        </KitThemeProvider>
+      </SafeAreaProvider>,
+    );
+    await fireEvent.press(screen.getByLabelText('Composants'));
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(scrollTo).toHaveBeenCalledWith({ y: 0, animated: true });
   });
 });

@@ -165,7 +165,7 @@ export function MediaGallery({ initialSection }: { initialSection?: string }) {
                         </View>
                       </View>
                       <View style={[styles.duration, { backgroundColor: withAlpha(BLACK, 0.87) }]}>
-                        <Text style={[font('400', 10.5), { color: WHITE }]}>{d}</Text>
+                        <Text style={[font('400', 11), { color: WHITE }]}>{d}</Text>
                       </View>
                     </View>
                     <Text numberOfLines={2} style={[font('600', 12.5), styles.videoTitle, { color: kit.textPrimary }]}>

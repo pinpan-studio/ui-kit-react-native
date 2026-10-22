@@ -14,8 +14,10 @@ import {
   ModalDrawer,
   SegmentedToggle,
   StatusBadge,
+  SwipeRow,
 } from '../../components';
 import { useKitSnack } from '../../core/snack';
+import { hapticToggle } from '../../mobile';
 import {
   CHAT_CONVERSATIONS,
   CURRENT_USER,
@@ -28,7 +30,7 @@ import {
   type FeedPost,
 } from '../../data/examples';
 import { breakpoints, font, kitText, radius, space, toneText, useKitTheme, type KitTone } from '../../theme';
-import { CommentView, ExInline, ExPage, ExTile, FilePicker } from './ExKit';
+import { CommentView, ExInline, ExPage, ExTile, FilePicker, useExRefresh } from './ExKit';
 
 const FOLDERS: [string, string, string][] = [
   ['inbox', 'Boîte de réception', 'mi:inbox'],
@@ -81,6 +83,7 @@ function Composer({
 export function InboxExample() {
   const { kit } = useKitTheme();
   const snack = useKitSnack();
+  const refresh = useExRefresh();
   const { width } = useWindowDimensions();
   const wide = width >= breakpoints.tablet;
   const [folder, setFolder] = useState('inbox');
@@ -110,6 +113,14 @@ export function InboxExample() {
   const open = (m: ExMessage) => {
     setCurrent(m.id);
     setUnread((u) => u.filter((x) => x !== m.id));
+  };
+  const archiveSwiped = (id: string) => {
+    hapticToggle();
+    setArchived((a) => [...a, id]);
+    snack.show('Message archivé', {
+      action: 'Annuler',
+      onAction: () => setArchived((a) => a.filter((x) => x !== id)),
+    });
   };
   const remove = (id: string, into: 'archive' | 'delete') => {
     const i = messages.findIndex((m) => m.id === id);
@@ -192,29 +203,33 @@ export function InboxExample() {
       {messages.length === 0 ? (
         <EmptyState icon="mi:inbox" title="Aucun message" subtitle="Ce dossier est vide." />
       ) : (
-        <ScrollView contentContainerStyle={styles.listBody}>
+        <ScrollView contentContainerStyle={styles.listBody} refreshControl={refresh}>
           {messages.map((m) => (
-            <ExTile
-              key={m.id}
-              selected={wide && current === m.id}
-              onPress={() => open(m)}
-              leading={<KitAvatar name={m.from} />}
-              title={m.from}
-              subtitle={`${m.subject}\n${m.preview}`}
-              trailing={
-                <View style={styles.msgMeta}>
-                  <Text style={[font(unread.includes(m.id) ? '700' : '400', 12), { color: kit.textPrimary }]}>
-                    {m.at}
-                  </Text>
-                  <View style={styles.rowGap4}>
-                    {m.label ? <StatusBadge label={m.label[0]} tone={m.label[1]} /> : null}
-                    {m.attachments?.length ? <Icon source="mi:attach-file" size={14} color={kit.textMuted} /> : null}
-                    {starred.includes(m.id) ? <Icon source="mi:star" size={16} color={kit.warning} /> : null}
-                    {unread.includes(m.id) ? <View style={[styles.unread, { backgroundColor: kit.primary }]} /> : null}
+            // Balayer vers la droite : archiver, avec « Annuler » (`Dismissible` du kit Flutter).
+            <SwipeRow key={m.id} allow={folder === 'archive' ? [] : ['archive']} onDismiss={() => archiveSwiped(m.id)}>
+              <ExTile
+                selected={wide && current === m.id}
+                onPress={() => open(m)}
+                leading={<KitAvatar name={m.from} />}
+                title={m.from}
+                subtitle={`${m.subject}\n${m.preview}`}
+                trailing={
+                  <View style={styles.msgMeta}>
+                    <Text style={[font(unread.includes(m.id) ? '700' : '400', 12), { color: kit.textPrimary }]}>
+                      {m.at}
+                    </Text>
+                    <View style={styles.rowGap4}>
+                      {m.label ? <StatusBadge label={m.label[0]} tone={m.label[1]} /> : null}
+                      {m.attachments?.length ? <Icon source="mi:attach-file" size={14} color={kit.textMuted} /> : null}
+                      {starred.includes(m.id) ? <Icon source="mi:star" size={16} color={kit.warning} /> : null}
+                      {unread.includes(m.id) ? (
+                        <View style={[styles.unread, { backgroundColor: kit.primary }]} />
+                      ) : null}
+                    </View>
                   </View>
-                </View>
-              }
-            />
+                }
+              />
+            </SwipeRow>
           ))}
         </ScrollView>
       )}
@@ -529,7 +544,7 @@ export function FeedExample() {
     </TouchableRipple>
   );
   return (
-    <ExPage maxWidth={640}>
+    <ExPage maxWidth={640} refreshable>
       <KitCard>
         <Composer
           hint={`Quoi de neuf, ${CURRENT_USER.fullname.split(' ')[0]} ?`}

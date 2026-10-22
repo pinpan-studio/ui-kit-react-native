@@ -12,6 +12,7 @@ import {
 import { Icon, TouchableRipple } from 'react-native-paper';
 
 import { KeyboardSafe } from '../../mobile';
+import { useScrollToTopOnReselect } from '../../shell/tabReselect';
 import { breakpoints, columns, font, kitText, space, useKitTheme } from '../../theme';
 
 /** Section documentée : ancre, titre, description, source, démos (`DocSection` Flutter, `<kit-section>`). */
@@ -59,6 +60,7 @@ export function DocPage({
   const { width: screen } = useWindowDimensions();
   const pad = screen < breakpoints.tablet ? space.m : space.l;
   const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
+  useScrollToTopOnReselect(scroll);
   const toc = useRef<ComponentRef<typeof ScrollView>>(null);
   const offsets = useRef<Record<string, number>>({});
   const chips = useRef<Record<string, { x: number; width: number }>>({});
@@ -216,7 +218,7 @@ const styles = StyleSheet.create({
   section: { paddingBottom: space.xl },
   sectionHead: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 10, rowGap: space.s1 },
   source: { borderRadius: 8, paddingHorizontal: space.s2, paddingVertical: space.s0_5 },
-  sourceText: font('400', 10.5, 'mono'),
+  sourceText: font('400', 11, 'mono'),
   description: { ...font('400', 13), lineHeight: 19.5, marginTop: space.s },
   items: { gap: space.m, marginTop: space.m },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },

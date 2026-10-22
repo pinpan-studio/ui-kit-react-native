@@ -628,7 +628,7 @@ export function KitTabs({
             <Text style={[on ? styles.tabOn : styles.tabOff, { color }]}>{t.label}</Text>
             {t.count !== undefined ? (
               <View style={[styles.tabCount, { backgroundColor: kit.primary }]}>
-                <Text style={[font('700', 10.5), { color: kit.onTone }]}>{t.count}</Text>
+                <Text style={[font('700', 11), { color: kit.onTone }]}>{t.count}</Text>
               </View>
             ) : null}
           </View>

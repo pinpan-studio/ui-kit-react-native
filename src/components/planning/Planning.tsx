@@ -120,7 +120,7 @@ export function PlanningCard({
   const body = (
     <View style={[styles.cardInner, { borderLeftColor: col }]}>
       <View style={styles.rowCenter}>
-        <Text numberOfLines={1} style={[font('400', 10.5, 'mono'), styles.fill, { color: kit.textMuted }]}>
+        <Text numberOfLines={1} style={[font('400', 11, 'mono'), styles.fill, { color: kit.textMuted }]}>
           {item.ref ?? ''}
         </Text>
         {item.badge ? <StatusBadge label={item.badge} tone={item.badgeTone ?? 'neutral'} /> : null}
@@ -404,7 +404,7 @@ export function GanttTimeline({
                   {r.label}
                 </Text>
                 {r.sub ? (
-                  <Text numberOfLines={1} style={[font('400', 10.5, 'mono'), { color: kit.textMuted }]}>
+                  <Text numberOfLines={1} style={[font('400', 11, 'mono'), { color: kit.textMuted }]}>
                     {r.sub}
                   </Text>
                 ) : null}
@@ -446,7 +446,7 @@ export function GanttTimeline({
                       { left: i * dayW, width: dayW, height: HEAD, backgroundColor: kit.tableHeader },
                     ]}
                   >
-                    <Text style={[font('400', 10), { color: kit.textMuted }]}>
+                    <Text style={[font('400', 11), { color: kit.textMuted }]}>
                       {(WEEKDAYS[wd] ?? '').slice(0, dayW < 36 ? 1 : 3)}
                     </Text>
                     <Text style={[font('700', 12.5), { color: sameDay(day, today) ? kit.primary : kit.textPrimary }]}>
@@ -554,7 +554,7 @@ export function NoteGrid({ items, onToggle }: { items: PlanningItem[]; onToggle:
             >
               <View>
                 <View style={styles.rowCenter}>
-                  <Text style={[font('400', 10.5, 'mono'), styles.fill, { color: kit.textMuted }]}>{it.ref ?? ''}</Text>
+                  <Text style={[font('400', 11, 'mono'), styles.fill, { color: kit.textMuted }]}>{it.ref ?? ''}</Text>
                   <TouchableRipple
                     onPress={() => onToggle(it)}
                     borderless
@@ -932,7 +932,7 @@ export function AgendaView({
               {Array.from({ length: endHour - startHour }, (_, k) => (
                 <View key={k} style={[styles.abs, styles.hourRow, { top: k * HOUR }]}>
                   <Text
-                    style={[font('400', 10.5), { width: GUTTER, color: kit.textMuted }]}
+                    style={[font('400', 11), { width: GUTTER, color: kit.textMuted }]}
                   >{`${String(startHour + k).padStart(2, '0')}:00`}</Text>
                   <View style={[styles.fill, styles.h1, { backgroundColor: kit.border }]} />
                 </View>
@@ -965,7 +965,7 @@ export function AgendaView({
                           <Text numberOfLines={2} style={[font('700', 11.5), { color: kit.textPrimary }]}>
                             {it.title}
                           </Text>
-                          <Text numberOfLines={1} style={[font('400', 10.5), { color: kit.textSecondary }]}>
+                          <Text numberOfLines={1} style={[font('400', 11), { color: kit.textSecondary }]}>
                             {`${time(s.getHours(), s.getMinutes())}${it.end ? ` – ${time(it.end.getHours(), it.end.getMinutes())}` : ''}`}
                           </Text>
                         </View>
@@ -1031,7 +1031,7 @@ const styles = StyleSheet.create({
   gantt: { flexDirection: 'row', borderWidth: 1, borderRadius: radius.md, overflow: 'hidden' },
   ganttLabels: { width: 118 },
   ganttHead: { justifyContent: 'center', paddingLeft: space.s3 },
-  ganttHeadText: { ...font('700', 10.5), letterSpacing: 0.5 },
+  ganttHeadText: { ...font('700', 11), letterSpacing: 0.5 },
   ganttLabel: {
     flexDirection: 'row',
     alignItems: 'center',

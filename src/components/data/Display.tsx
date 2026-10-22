@@ -340,7 +340,7 @@ export function TextDiff({
             ]}
           >
             <Text
-              style={[font('400', 10.5, 'mono'), styles.diffNo, { color: kit.textMuted, lineHeight: base.lineHeight }]}
+              style={[font('400', 11, 'mono'), styles.diffNo, { color: kit.textMuted, lineHeight: base.lineHeight }]}
             >
               {l.newNo ?? l.oldNo ?? ''}
             </Text>

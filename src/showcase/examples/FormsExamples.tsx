@@ -21,7 +21,7 @@ import {
 import { number } from '../../core/format';
 import { useKitSnack } from '../../core/snack';
 import { breakpoints, font, radius, space, useKitTheme, type KitTone } from '../../theme';
-import { ExGap, ExHeading, ExPage, ExRow, ExSuccess } from './ExKit';
+import { ExActionBar, ExGap, ExHeading, ExPage, ExRow, ExSuccess, useFieldChain } from './ExKit';
 
 const francs = (v: number) => `${number(v)} F CFA`;
 
@@ -44,6 +44,7 @@ export function ContactFormExample() {
   const { kit } = useKitTheme();
   const [sent, setSent] = useState(false);
   const [subject, setSubject] = useState<string | null>('Demande de démo');
+  const field = useFieldChain(3);
   const infos: [string, string, string][] = [
     ['mi:phone', 'Téléphone', '+225 27 22 40 50 60'],
     ['mi:alternate-email', 'E-mail', 'contact@sc-storage.ci'],
@@ -76,10 +77,24 @@ export function ContactFormExample() {
         ) : (
           <ExGap>
             <ExRow>
-              <KitTextField label="Nom complet" hint="Jean Kouassi" icon="mi:person-outline" required />
-              <KitTextField label="E-mail" hint="nom@entreprise.ci" icon="mi:alternate-email" required />
+              <KitTextField label="Nom complet" hint="Jean Kouassi" icon="mi:person-outline" required {...field(0)} />
+              <KitTextField
+                label="E-mail"
+                hint="nom@entreprise.ci"
+                icon="mi:alternate-email"
+                required
+                keyboardType="email-address"
+                autoCapitalize="none"
+                {...field(1)}
+              />
             </ExRow>
-            <KitTextField label="Téléphone" hint="07 07 12 34 56" icon="mi:phone" keyboardType="phone-pad" />
+            <KitTextField
+              label="Téléphone"
+              hint="07 07 12 34 56"
+              icon="mi:phone"
+              keyboardType="phone-pad"
+              {...field(2)}
+            />
             <SearchableSelect
               label="Objet"
               value={subject}
@@ -141,7 +156,20 @@ export function BookingFormExample() {
       </ExPage>
     );
   return (
-    <ExPage>
+    <ExPage
+      footer={
+        <ExActionBar>
+          <View style={styles.fill}>
+            <KitButton
+              label="Confirmer la réservation"
+              icon="mi:event-available"
+              expand
+              onPress={slot < 0 ? undefined : () => setDone(true)}
+            />
+          </View>
+        </ExActionBar>
+      }
+    >
       <ExHeading title="Réservez un créneau" subtitle="Choisissez une prestation, un jour et une heure." />
       {TYPES.map(([label, duration, icon], i) => (
         <View key={label} style={styles.mb8}>
@@ -178,12 +206,6 @@ export function BookingFormExample() {
       <View style={styles.mv16}>
         <KitTextField label="Remarque (facultatif)" lines={3} />
       </View>
-      <KitButton
-        label="Confirmer la réservation"
-        icon="mi:event-available"
-        expand
-        onPress={slot < 0 ? undefined : () => setDone(true)}
-      />
     </ExPage>
   );
 }
@@ -331,6 +353,8 @@ export function CheckoutFormExample() {
   const subtotal = ITEMS.reduce((s, [, p, q]) => s + p * q, 0);
   const shipping = SHIPS[Number(ship)]!;
   const total = subtotal + shipping[2];
+  const ship1 = useFieldChain(4);
+  const pay1 = useFieldChain(3);
 
   if (done)
     return (
@@ -370,11 +394,11 @@ export function CheckoutFormExample() {
   const bodies = [
     <ExGap key={0}>
       <ExRow>
-        <KitTextField label="Nom complet" defaultValue="Aya Koné" />
-        <KitTextField label="Téléphone" defaultValue="+225 07 07 12 34 56" />
+        <KitTextField label="Nom complet" defaultValue="Aya Koné" {...ship1(0)} />
+        <KitTextField label="Téléphone" defaultValue="+225 07 07 12 34 56" keyboardType="phone-pad" {...ship1(1)} />
       </ExRow>
-      <KitTextField label="Adresse" defaultValue="Cocody Angré, 8e tranche" />
-      <KitTextField label="Indications" hint="Portail bleu, à côté de la pharmacie…" />
+      <KitTextField label="Adresse" defaultValue="Cocody Angré, 8e tranche" {...ship1(2)} />
+      <KitTextField label="Indications" hint="Portail bleu, à côté de la pharmacie…" {...ship1(3)} />
       <View accessibilityRole="radiogroup">
         {SHIPS.map(([n, d, p], i) => (
           <RadioTile
@@ -401,10 +425,11 @@ export function CheckoutFormExample() {
             hint="4242 4242 4242 4242"
             icon="mi:credit-card"
             keyboardType="number-pad"
+            {...pay1(0)}
           />
           <ExRow>
-            <KitTextField label="Expiration" hint="MM / AA" />
-            <KitTextField label="CVC" hint="123" keyboardType="number-pad" />
+            <KitTextField label="Expiration" hint="MM / AA" keyboardType="number-pad" {...pay1(1)} />
+            <KitTextField label="CVC" hint="123" keyboardType="number-pad" {...pay1(2)} />
           </ExRow>
         </>
       ) : (
@@ -425,18 +450,22 @@ export function CheckoutFormExample() {
       <ExGap>
         <StepBadges labels={['Livraison', 'Paiement', 'Validation']} step={step} />
         {bodies[step]}
-        <View style={[styles.between, styles.wrap]}>
+      </ExGap>
+    </KitCard>
+  );
+  return (
+    <ExPage
+      maxWidth={1080}
+      footer={
+        <ExActionBar>
           <KitButton label="Retour" variant="ghost" onPress={step === 0 ? undefined : () => setStep(step - 1)} />
           <KitButton
             label={step === 2 ? 'Payer' : 'Continuer'}
             onPress={() => (step === 2 ? setDone(true) : setStep(step + 1))}
           />
-        </View>
-      </ExGap>
-    </KitCard>
-  );
-  return (
-    <ExPage maxWidth={1080}>
+        </ExActionBar>
+      }
+    >
       {width < breakpoints.lg ? (
         <ExGap>
           {form}
@@ -473,14 +502,15 @@ export function OnboardingFormExample() {
   const [sector, setSector] = useState('Transport & logistique');
   const [modules, setModules] = useState(['Stocks']);
   const [invites, setInvites] = useState(['awa.diallo@sotra.ci']);
+  const field = useFieldChain(3);
   const bodies = [
     <ExGap key={0}>
       <ExHeading title="Faisons connaissance" />
       <ExRow>
-        <KitTextField label="Prénom" defaultValue="Koffi" />
-        <KitTextField label="Nom" defaultValue="Yao" />
+        <KitTextField label="Prénom" defaultValue="Koffi" {...field(0)} />
+        <KitTextField label="Nom" defaultValue="Yao" {...field(1)} />
       </ExRow>
-      <KitTextField label="Fonction" defaultValue="Directeur des opérations" />
+      <KitTextField label="Fonction" defaultValue="Directeur des opérations" {...field(2)} />
     </ExGap>,
     <ExGap key={1}>
       <ExHeading title="Votre organisation" />
@@ -534,20 +564,23 @@ export function OnboardingFormExample() {
     </ExGap>,
   ];
   return (
-    <ExPage>
+    <ExPage
+      footer={
+        <ExActionBar>
+          <KitButton label="Retour" variant="ghost" onPress={step === 0 ? undefined : () => setStep(step - 1)} />
+          <KitButton
+            label={step === 3 ? 'Terminer' : 'Continuer'}
+            onPress={() => (step === 3 ? snack.show('Espace configuré (démo)') : setStep(step + 1))}
+          />
+        </ExActionBar>
+      }
+    >
       <Text
         style={[font('400', 14), styles.mb8, { color: kit.textMuted }]}
       >{`Étape ${step + 1} sur 4 · ${STEPS[step]}`}</Text>
       <KitProgressBar value={(step + 1) / 4} />
       <View style={styles.h24} />
       <KitCard padding={space.l}>{bodies[step]}</KitCard>
-      <View style={[styles.between, styles.wrap, styles.mt16]}>
-        <KitButton label="Retour" variant="ghost" onPress={step === 0 ? undefined : () => setStep(step - 1)} />
-        <KitButton
-          label={step === 3 ? 'Terminer' : 'Continuer'}
-          onPress={() => (step === 3 ? snack.show('Espace configuré (démo)') : setStep(step + 1))}
-        />
-      </View>
     </ExPage>
   );
 }
@@ -564,6 +597,7 @@ export function ApplicationFormExample() {
   const { width } = useWindowDimensions();
   const [sent, setSent] = useState(false);
   const [consent, setConsent] = useState(false);
+  const field = useFieldChain(4);
   const [skills, setSkills] = useState(['Angular', 'Flutter', 'TypeScript']);
   const [jobs, setJobs] = useState<[string, string][]>([['Développeur front-end', 'Orange CI · 2020 – 2024']]);
   if (sent)
@@ -621,12 +655,17 @@ export function ApplicationFormExample() {
             'mi:person-outline',
             <ExGap>
               <ExRow>
-                <KitTextField label="Prénom" defaultValue="Mariam" />
-                <KitTextField label="Nom" defaultValue="Touré" />
+                <KitTextField label="Prénom" defaultValue="Mariam" {...field(0)} />
+                <KitTextField label="Nom" defaultValue="Touré" {...field(1)} />
               </ExRow>
               <ExRow>
-                <KitTextField label="Date de naissance" hint="jj/mm/aaaa" />
-                <KitTextField label="Téléphone" hint="+225 07 …" keyboardType="phone-pad" />
+                <KitTextField
+                  label="Date de naissance"
+                  hint="jj/mm/aaaa"
+                  keyboardType="numbers-and-punctuation"
+                  {...field(2)}
+                />
+                <KitTextField label="Téléphone" hint="+225 07 …" keyboardType="phone-pad" {...field(3)} />
               </ExRow>
             </ExGap>,
           )}

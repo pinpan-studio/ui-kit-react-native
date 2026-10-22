@@ -1,10 +1,12 @@
 import { useState, type ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Icon, TouchableRipple } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { KitIconButton } from '../../mobile/KitIconButton';
+import { useSheetGesture } from '../../mobile/useSheetGesture';
 import {
   breakpoints,
   font,
@@ -393,6 +395,9 @@ export function SidePanel({
   );
 }
 
+/** Largeur du tiroir modal (`Drawer(width: 300)` Flutter). */
+const DRAWER_WIDTH = 300;
+
 /** Tiroir modal gauche (`Drawer` Flutter) : 300 dp, coins droits arrondis, voile qui ferme au toucher. */
 export function ModalDrawer({
   visible,
@@ -406,30 +411,36 @@ export function ModalDrawer({
   const { kit, roles } = useKitTheme();
   // Insets explicites : dans une Modal native, SafeAreaView ne reçoit pas les marges (iOS).
   const insets = useSafeAreaInsets();
+  const drawer = useSheetGesture({ visible, onDismiss, distance: DRAWER_WIDTH + insets.left, axis: 'x' });
   return (
-    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onDismiss}>
-      <View style={styles.fill}>
-        <Pressable
-          onPress={onDismiss}
-          accessibilityRole="button"
-          accessibilityLabel="Fermer le menu"
-          style={[StyleSheet.absoluteFill, { backgroundColor: withAlpha(roles.scrim, 0.32) }]}
-        />
-        <View
-          accessibilityViewIsModal
-          style={[
-            styles.drawer,
-            {
-              backgroundColor: kit.card,
-              paddingTop: insets.top,
-              paddingBottom: insets.bottom,
-              paddingLeft: insets.left,
-            },
-          ]}
-        >
-          {children}
-        </View>
-      </View>
+    <Modal visible={drawer.mounted} transparent animationType="none" statusBarTranslucent onRequestClose={drawer.close}>
+      <GestureHandlerRootView style={styles.fill}>
+        <Animated.View style={[StyleSheet.absoluteFill, { opacity: drawer.scrim }]}>
+          <Pressable
+            onPress={drawer.close}
+            accessibilityRole="button"
+            accessibilityLabel="Fermer le menu"
+            style={[StyleSheet.absoluteFill, { backgroundColor: withAlpha(roles.scrim, 0.32) }]}
+          />
+        </Animated.View>
+        <GestureDetector gesture={drawer.gesture}>
+          <Animated.View
+            accessibilityViewIsModal
+            style={[
+              styles.drawer,
+              {
+                backgroundColor: kit.card,
+                paddingTop: insets.top,
+                paddingBottom: insets.bottom,
+                paddingLeft: insets.left,
+                transform: [{ translateX: drawer.offset }],
+              },
+            ]}
+          >
+            {children}
+          </Animated.View>
+        </GestureDetector>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
@@ -513,7 +524,7 @@ const styles = StyleSheet.create({
   divider: { height: 1 },
   panelHost: { flex: 1, alignItems: 'flex-end' },
   drawer: {
-    width: 300,
+    width: DRAWER_WIDTH,
     maxWidth: '85%',
     height: '100%',
     borderTopRightRadius: radius.lg,

@@ -4,7 +4,7 @@ import { withAlpha } from '../src/theme/colors';
 import { fontFamily } from '../src/theme/fonts';
 import { PALETTE_ORDER, PALETTES } from '../src/theme/generated/palettes';
 import { KIT_TONES, toneColor, toneLight, toneText } from '../src/theme/tone';
-import { columns, elevation } from '../src/theme/tokens';
+import { columns, disabledLayers, elevation, MIN_TOUCH, motion, sizes, stateLayers } from '../src/theme/tokens';
 import { coloredText, kitText } from '../src/theme/typography';
 
 type Mode = 'light' | 'dark';
@@ -197,5 +197,31 @@ describe('jetons', () => {
     expect(elevation(5, 'dark').boxShadow).toBe(
       '0 24px 48px -12px rgba(0, 0, 0, 0.6), 0 10px 20px -6px rgba(0, 0, 0, 0.5)',
     );
+  });
+});
+
+// Mêmes valeurs que `test/theme_test.dart` du kit Flutter : les deux kits partagent leurs jetons.
+describe('jetons partagés avec le kit Flutter', () => {
+  it('cible tactile et dimensions', () => {
+    expect(MIN_TOUCH).toBe(48);
+    expect(Object.values(sizes.button)).toEqual([32, 40, 42, 48]);
+    expect([sizes.icon.sm, sizes.icon.md, sizes.icon.lg, sizes.avatar, sizes.appBar, sizes.toc]).toEqual([
+      16, 20, 24, 36, 64, 48,
+    ]);
+  });
+  it('couches d’état', () => {
+    expect([stateLayers.hover, stateLayers.focus, stateLayers.pressed, stateLayers.dragged]).toEqual([
+      0.08, 0.12, 0.12, 0.16,
+    ]);
+    expect([disabledLayers.container, disabledLayers.content]).toEqual([0.12, 0.38]);
+  });
+  it('durées d’animation', () => {
+    expect([motion.instant, motion.fast, motion.base, motion.medium, motion.slow, motion.emphasized]).toEqual([
+      100, 150, 200, 250, 300, 400,
+    ]);
+  });
+  it('petits styles typographiques', () => {
+    expect(kitText.micro.fontSize).toBe(11);
+    expect(kitText.labelSm.fontSize).toBe(11.5);
   });
 });

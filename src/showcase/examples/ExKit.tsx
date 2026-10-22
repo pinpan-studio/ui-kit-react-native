@@ -1,11 +1,35 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
-import { Modal, ScrollView, StyleSheet, Text, View, useWindowDimensions, type TextStyle } from 'react-native';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentRef,
+  type ReactNode,
+} from 'react';
+import {
+  Keyboard,
+  Modal,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+  type TextInput,
+  type TextInputProps,
+  type TextStyle,
+} from 'react-native';
 import { Icon, TouchableRipple } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 
 import { KitAvatar, KitButton, KitCheckbox, StatusBadge, markdownInline } from '../../components';
 import { compact } from '../../core/format';
 import { useKitSnack } from '../../core/snack';
+import { hapticToggle, KeyboardSafe } from '../../mobile';
 import { FM_ITEMS, FM_KINDS, fmModified, type ArticleBlock, type CommentItem } from '../../data/examples';
 import {
   breakpoints,
@@ -39,15 +63,127 @@ export const useExNav = () => useContext(ExNavContext);
 
 // ── Mise en page ────────────────────────────────────────────────────
 
+/**
+ * Actualisation simulée d'une liste d'exemple (données statiques) : indicateur, retour haptique,
+ * puis « Liste à jour » (`exRefresh` du kit Flutter). À passer en `refreshControl` d'un ScrollView.
+ */
+export function useExRefresh() {
+  const snack = useKitSnack();
+  const { colors } = useKitTheme();
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+      hapticToggle();
+      snack.show('Liste à jour', { kind: 'success' });
+    }, 700);
+  }, [snack]);
+  return (
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tintColor={colors.primary}
+      colors={[colors.primary]}
+    />
+  );
+}
+
 /** Page d'exemple : contenu défilant, centré à une largeur maximale, marges selon la largeur. */
-export function ExPage({ children, maxWidth = 720 }: { children: ReactNode; maxWidth?: number }) {
+export function ExPage({
+  children,
+  maxWidth = 720,
+  refreshable = false,
+  footer,
+}: {
+  children: ReactNode;
+  maxWidth?: number;
+  /** Tirer pour actualiser (listes). */
+  refreshable?: boolean;
+  /** Barre d'action collée en bas (`ExActionBar`) : elle remonte avec le clavier. */
+  footer?: ReactNode;
+}) {
   const { width } = useWindowDimensions();
   const pad = width < breakpoints.tablet ? space.s4 : space.s6;
+  const refresh = useExRefresh();
+  if (footer)
+    return (
+      <KeyboardSafe
+        footer={footer}
+        contentContainerStyle={{ paddingHorizontal: pad, paddingTop: space.s3, paddingBottom: pad }}
+      >
+        <View style={[styles.center, { maxWidth }]}>{children}</View>
+      </KeyboardSafe>
+    );
   return (
-    <ScrollView contentContainerStyle={{ paddingHorizontal: pad, paddingTop: space.s3, paddingBottom: pad }}>
+    <ScrollView
+      refreshControl={refreshable ? refresh : undefined}
+      // Le champ qui a le focus reste visible au-dessus du clavier (formulaires sans barre d'action).
+      keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets
+      contentContainerStyle={{ paddingHorizontal: pad, paddingTop: space.s3, paddingBottom: pad }}
+    >
       <View style={[styles.center, { maxWidth }]}>{children}</View>
     </ScrollView>
   );
+}
+
+type TextInputRef = ComponentRef<typeof TextInput>;
+
+/**
+ * Barre d'action collée en bas d'un formulaire (`ExActionBar` du kit Flutter) : toujours à portée du pouce,
+ * au-dessus du clavier et de la barre système. À passer en `footer` d'`ExPage`.
+ */
+export function ExActionBar({ children }: { children: ReactNode }) {
+  const { kit } = useKitTheme();
+  const insets = useSafeAreaInsets();
+  // Clavier ouvert : la barre se pose dessus, sans la marge de la barre système.
+  const [keyboard, setKeyboard] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () =>
+      setKeyboard(true),
+    );
+    const hide = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () =>
+      setKeyboard(false),
+    );
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return (
+    <View
+      style={[
+        styles.actionBar,
+        {
+          backgroundColor: kit.card,
+          borderTopColor: kit.border,
+          paddingBottom: (keyboard ? 0 : insets.bottom) + space.s3,
+        },
+      ]}
+    >
+      {children}
+    </View>
+  );
+}
+
+/**
+ * Enchaînement des champs au clavier : « Suivant » passe au champ suivant, le dernier affiche « OK »
+ * (`TextInputAction.next` / `done` du kit Flutter). `field(i)` se répand sur le i-ème `KitTextField`.
+ */
+export function useFieldChain(count: number) {
+  const refs = useRef<(TextInputRef | null)[]>([]);
+  return (i: number): Partial<TextInputProps> & { ref: (r: TextInputRef | null) => void } => {
+    const last = i >= count - 1;
+    return {
+      ref: (r) => {
+        refs.current[i] = r;
+      },
+      returnKeyType: last ? 'done' : 'next',
+      submitBehavior: last ? 'blurAndSubmit' : 'submit',
+      onSubmitEditing: last ? undefined : () => refs.current[i + 1]?.focus(),
+    };
+  };
 }
 
 /** Titre + sous-titre de section. */
@@ -474,6 +610,15 @@ export function FilePicker({ visible, onClose }: { visible: boolean; onClose: ()
 }
 
 const styles = StyleSheet.create({
+  actionBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: space.s2,
+    paddingHorizontal: space.s4,
+    paddingTop: space.s3,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
   fill: { flex: 1 },
   abs: { position: 'absolute', left: 0, top: 0 },
   center: { width: '100%', alignSelf: 'center' },

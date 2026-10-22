@@ -208,7 +208,7 @@ export function AddressField({
           <Text
             style={[font('600', 12.5), styles.fill, { color: kit.textPrimary }]}
           >{`${place.label} — ${place.detail}`}</Text>
-          <Text style={[font('400', 10.5, 'mono'), { color: kit.textMuted }]}>
+          <Text style={[font('400', 11, 'mono'), { color: kit.textMuted }]}>
             {`${place.lat.toFixed(4)}, ${place.lng.toFixed(4)}`}
           </Text>
         </View>

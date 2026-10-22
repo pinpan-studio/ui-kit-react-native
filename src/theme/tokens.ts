@@ -1,4 +1,4 @@
-import type { ViewStyle } from 'react-native';
+import { Easing, type ViewStyle } from 'react-native';
 
 import { CSS_ELEVATION, RADIUS, SPACE, STATE_LAYERS } from './generated/tokens';
 
@@ -39,6 +39,28 @@ export const radius = {
 } as const;
 
 export const stateLayers = STATE_LAYERS;
+
+/** Fond et contenu d'un élément désactivé (`StateLayers` du kit Flutter). */
+export const disabledLayers = { container: 0.12, content: 0.38 } as const;
+
+/**
+ * Durées (ms) et courbes d'animation partagées (`Motion` du kit Flutter).
+ * standard : sur place · decelerate : entrée · accelerate : sortie · emphasized : changement de page.
+ */
+export const motion = {
+  instant: 100,
+  fast: 150,
+  base: 200,
+  medium: 250,
+  slow: 300,
+  emphasized: 400,
+  easing: {
+    standard: Easing.inOut(Easing.cubic),
+    decelerate: Easing.out(Easing.cubic),
+    accelerate: Easing.in(Easing.cubic),
+    emphasized: Easing.out(Easing.poly(4)),
+  },
+} as const;
 
 /**
  * Points de rupture (dp) : ceux du kit Flutter (`Breakpoints`, `_breakpoints.scss`)

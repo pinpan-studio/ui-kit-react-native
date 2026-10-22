@@ -179,7 +179,7 @@ export function HarnaisScreen({ onExit, initialConversation }: { onExit: () => v
               <Composer store={store} placeholder="Répondre…" />
               <Text
                 style={[
-                  font('400', 10.5),
+                  font('400', 11),
                   styles.disclaimer,
                   { color: kit.textMuted, marginBottom: insets.bottom + space.s2 },
                 ]}
@@ -345,7 +345,7 @@ function ConversationList({ store, onOpen }: { store: HarnaisStore; onOpen: (id:
       <ScrollView style={styles.fill} contentContainerStyle={styles.drawerList}>
         {groups.map(([g, items]) => (
           <View key={g}>
-            <Text style={[font('700', 10.5), styles.groupHead, { color: kit.textMuted }]}>{g.toUpperCase()}</Text>
+            <Text style={[font('700', 11), styles.groupHead, { color: kit.textMuted }]}>{g.toUpperCase()}</Text>
             {items.map(tile)}
           </View>
         ))}
@@ -555,7 +555,7 @@ function MessageView({
         <View style={[styles.bubble, { backgroundColor: kit.hover }]}>
           <Text style={[font('400', 14), { color: kit.textPrimary, lineHeight: 20 }]}>{textOf(m, '\n')}</Text>
         </View>
-        <Text style={[font('400', 10.5), styles.mt2, { color: kit.textMuted }]}>{m.time}</Text>
+        <Text style={[font('400', 11), styles.mt2, { color: kit.textMuted }]}>{m.time}</Text>
       </View>
     );
   }
@@ -573,7 +573,7 @@ function MessageView({
       <View style={[styles.row, styles.gap6]}>
         <Icon source="mi:auto-awesome" size={18} color={kit.tertiary} />
         <Text style={[font('700', 13), { color: kit.textPrimary }]}>Harnais</Text>
-        <Text style={[font('400', 10.5), { color: kit.textMuted }]}>{m.time}</Text>
+        <Text style={[font('400', 11), { color: kit.textMuted }]}>{m.time}</Text>
         {m.streaming ? <ActivityIndicator size={12} color={kit.tertiary} /> : null}
       </View>
       <View style={styles.blocks}>

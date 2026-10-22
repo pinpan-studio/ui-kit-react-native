@@ -1,8 +1,10 @@
 import { router } from 'expo-router';
+import { useRef, type ComponentRef } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-paper';
 
 import { KitCard, ResponsiveGrid } from '../../components';
+import { useScrollToTopOnReselect } from '../../shell/tabReselect';
 import { KIT_CATEGORIES } from '../../showcase/kitNav';
 import { font, kitText, radius, space, useKitTheme } from '../../theme';
 
@@ -11,8 +13,10 @@ const TOTAL = KIT_CATEGORIES.reduce((n, c) => n + c.sections.length, 0);
 /** `/components` — index des galeries (`ComponentsIndexPage` Flutter) : une carte par catégorie. */
 export default function ComponentsIndex() {
   const { kit } = useKitTheme();
+  const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
+  useScrollToTopOnReselect(scroll);
   return (
-    <ScrollView contentContainerStyle={styles.body} testID="components-index">
+    <ScrollView ref={scroll} contentContainerStyle={styles.body} testID="components-index">
       <Text style={[kitText.bodySm, styles.intro, { color: kit.textSecondary }]}>
         {`${KIT_CATEGORIES.length} galeries · ${TOTAL} sections documentées`}
       </Text>

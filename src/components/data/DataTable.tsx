@@ -4,6 +4,7 @@ import { Icon, Menu, TouchableRipple } from 'react-native-paper';
 
 import { KitIconButton } from '../../mobile/KitIconButton';
 import { breakpoints, font, radius, space, tabular, useKitTheme, withAlpha } from '../../theme';
+import { KitButton } from '../core/Button';
 import { KitCard } from '../core/Card';
 import { SkeletonListTile } from '../core/Skeleton';
 import { EmptyState } from '../core/States';
@@ -81,6 +82,8 @@ export function KitDataTable<T>({
   const [asc, setAsc] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
+  // Cartes sur téléphone : nombre de cartes affichées, augmenté par « Afficher plus » (pas de pages).
+  const [count, setCount] = useState(initialPageSize);
   const [mode, setMode] = useState<ViewMode>(initialMode);
   const [sel, setSel] = useState<string[]>([]);
   const [hidden, setHidden] = useState(() => columns.flatMap((c, i) => (c.hidden ? [i] : [])));
@@ -104,7 +107,9 @@ export function KitDataTable<T>({
   }
   const pages = Math.max(1, Math.ceil(all.length / pageSize));
   const current = Math.min(page, pages);
-  const shown = all.slice((current - 1) * pageSize, current * pageSize);
+  // Sur téléphone, les cartes se chargent au fil de la lecture ; les pages restent pour la liste et la tablette.
+  const progressive = mode === 'card' && width < breakpoints.md;
+  const shown = progressive ? all.slice(0, count) : all.slice((current - 1) * pageSize, current * pageSize);
   const cols = columns.map((_, i) => i).filter((i) => !hidden.includes(i));
   const isSel = (r: T) => sel.includes(keyOf(r));
   const toggle = (r: T) => setSel((s) => (s.includes(keyOf(r)) ? s.filter((k) => k !== keyOf(r)) : [...s, keyOf(r)]));
@@ -129,6 +134,7 @@ export function KitDataTable<T>({
             onChangeText={(v) => {
               setQ(v);
               setPage(1);
+              setCount(pageSize);
             }}
           />
         </View>
@@ -395,23 +401,34 @@ export function KitDataTable<T>({
         table
       )}
       <View style={styles.mt8}>
-        <KitPaginator
-          page={current}
-          pageSize={pageSize}
-          total={all.length}
-          compact={width < breakpoints.sm}
-          onPage={setPage}
-          onPageSize={(s) => {
-            setPageSize(s);
-            setPage(1);
-          }}
-        />
+        {progressive ? (
+          <ShowMore
+            shown={Math.min(count, all.length)}
+            total={all.length}
+            step={pageSize}
+            onMore={() => setCount((n) => n + pageSize)}
+          />
+        ) : (
+          <KitPaginator
+            page={current}
+            pageSize={pageSize}
+            total={all.length}
+            compact={width < breakpoints.sm}
+            onPage={setPage}
+            onPageSize={(s) => {
+              setPageSize(s);
+              setPage(1);
+            }}
+          />
+        )}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  showMore: { gap: space.s2 },
+  showMoreCount: { textAlign: 'center' },
   fill: { flex: 1 },
   mt8: { marginTop: space.s2 },
   toolbar: { flexDirection: 'row', alignItems: 'center', gap: space.s2, marginBottom: 10 },
@@ -439,3 +456,23 @@ const styles = StyleSheet.create({
   cards: { gap: space.s3 },
   cardTouch: { borderRadius: radius.card },
 });
+
+/** Pied de liste en cartes sur téléphone : « Afficher plus » et compteur (`_ShowMore` du kit Flutter). */
+function ShowMore({ shown, total, step, onMore }: { shown: number; total: number; step: number; onMore: () => void }) {
+  const { kit } = useKitTheme();
+  const rest = total - shown;
+  return (
+    <View style={styles.showMore}>
+      {rest > 0 ? (
+        <KitButton
+          label={`Afficher ${Math.min(step, rest)} de plus`}
+          icon="chevron-down"
+          variant="outline"
+          expand
+          onPress={onMore}
+        />
+      ) : null}
+      <Text style={[font('400', 12), styles.showMoreCount, { color: kit.textMuted }]}>{`${shown} sur ${total}`}</Text>
+    </View>
+  );
+}

@@ -138,7 +138,7 @@ export function ClientsExample() {
   );
 
   return (
-    <ExPage maxWidth={1280}>
+    <ExPage maxWidth={1280} refreshable>
       <ExHeader
         eyebrow="CRM"
         title="Clients"

@@ -164,12 +164,12 @@ function Tile({
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ selected: active }}
       onPress={onPress}
-      style={[styles.tile, { minHeight: dense ? 40 : indent ? 48 : 56, paddingLeft: indent ? space.s6 : space.s3 }]}
+      style={[styles.tile, { minHeight: dense || indent ? MIN_TOUCH : 56, paddingLeft: indent ? space.s6 : space.s3 }]}
     >
       <View style={styles.row}>
         {icon ? <Icon source={icon} size={20} color={active ? kit.primary : kit.textSecondary} /> : null}
         <View style={styles.fill}>
-          <Text style={[font(bold ? '700' : '500', dense ? 13 : 14), { color }]}>{label}</Text>
+          <Text style={[font(bold ? '700' : '500', 14), { color }]}>{label}</Text>
           {subtitle ? <Text style={[font('400', 12), { color: kit.textSecondary }]}>{subtitle}</Text> : null}
         </View>
       </View>

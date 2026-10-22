@@ -24,7 +24,7 @@ import { TypographyGallery } from '../src/showcase/TypographyGallery';
 import { useThemeStore } from '../src/store/themeStore';
 import { KitThemeProvider } from '../src/theme/KitThemeProvider';
 
-jest.mock('expo-router', () => ({ router: { navigate: jest.fn() } }));
+jest.mock('expo-router', () => ({ usePathname: () => '/', router: { navigate: jest.fn() } }));
 
 const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 0, left: 0, right: 0, bottom: 0 } };
 

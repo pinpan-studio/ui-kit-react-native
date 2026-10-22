@@ -148,7 +148,7 @@ function Themes() {
             >
               <View>
                 <Text style={[font('600', 13), { color: roles[on_] }]}>{label}</Text>
-                <Text style={[font('400', 10.5, 'mono'), styles.roleHex, { color: withAlpha(roles[on_], 0.8) }]}>
+                <Text style={[font('400', 11, 'mono'), styles.roleHex, { color: withAlpha(roles[on_], 0.8) }]}>
                   {`${token} · ${hexLabel(roles[token])}`}
                 </Text>
               </View>
@@ -207,8 +207,8 @@ function Swatch({
         ]}
       />
       <Text style={[font('700', 13), styles.mt8, { color: kit.textPrimary }]}>{name}</Text>
-      <Text style={[font('400', 10.5, 'mono'), { color: kit.textSecondary }]}>{`kit.${token}`}</Text>
-      <Text style={[font('400', 10.5, 'mono'), { color: kit.textMuted }]}>{hex}</Text>
+      <Text style={[font('400', 11, 'mono'), { color: kit.textSecondary }]}>{`kit.${token}`}</Text>
+      <Text style={[font('400', 11, 'mono'), { color: kit.textMuted }]}>{hex}</Text>
       {note ? <Text style={[font('400', 11), styles.italic, { color: kit.textMuted }]}>{note}</Text> : null}
     </KitCard>
   );
@@ -319,7 +319,7 @@ function TypeScale() {
     <KitCard padding={0}>
       {rows.map(([k, sample, style], i) => (
         <View key={k} style={[styles.typeRow, i > 0 && { borderTopWidth: 1, borderTopColor: kit.divider }]}>
-          <Text style={[font('400', 10.5, 'mono'), styles.mb4, { color: kit.textMuted }]}>{k}</Text>
+          <Text style={[font('400', 11, 'mono'), styles.mb4, { color: kit.textMuted }]}>{k}</Text>
           <Text style={[{ color: kit.textPrimary }, style]}>{sample}</Text>
         </View>
       ))}
@@ -389,7 +389,7 @@ function Radii() {
               ]}
             >
               <Text style={[font('400', 11, 'mono'), { color: kit.textSecondary }]}>{n}</Text>
-              <Text style={[font('400', 10.5), { color: kit.textMuted }]}>{`${px} px`}</Text>
+              <Text style={[font('400', 11), { color: kit.textMuted }]}>{`${px} px`}</Text>
             </View>
           </TouchableRipple>
         ))}
@@ -445,7 +445,7 @@ function IconGrid() {
               >
                 <View style={styles.iconInner}>
                   <Icon source={iconSource(n)} size={24} color={kit.textPrimary} />
-                  <Text numberOfLines={2} style={[font('400', 9.5), styles.centerText, { color: kit.textMuted }]}>
+                  <Text numberOfLines={2} style={[font('400', 11), styles.centerText, { color: kit.textMuted }]}>
                     {n}
                   </Text>
                 </View>

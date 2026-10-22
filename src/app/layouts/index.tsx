@@ -96,7 +96,7 @@ function TemplateCard({ t, onOpen }: { t: LayoutTemplate; onOpen: () => void }) 
           <Icon source="mi:open-in-new" size={18} color={kit.textMuted} />
         </View>
         <Text style={[font('400', 12.5), styles.desc, { color: kit.textSecondary }]}>{t.description}</Text>
-        <Text style={[font('400', 10.5, 'mono'), { color: kit.textMuted }]}>{t.file}</Text>
+        <Text style={[font('400', 11, 'mono'), { color: kit.textMuted }]}>{t.file}</Text>
       </View>
     </KitCard>
   );

@@ -147,7 +147,7 @@ function InterventionsBody() {
             <View style={[styles.stripe, { backgroundColor: toneColor(tone, kit) }]} />
             <View style={styles.fill}>
               <Text
-                style={[font('400', 10.5, 'mono'), { color: kit.textMuted }]}
+                style={[font('400', 11, 'mono'), { color: kit.textMuted }]}
               >{`INT-${String(412 + i).padStart(4, '0')}`}</Text>
               <Text style={[font('600', 14), { color: kit.textPrimary }]}>{t}</Text>
               <Text style={[font('400', 12), { color: toneText(tone, kit) }]}>{s}</Text>

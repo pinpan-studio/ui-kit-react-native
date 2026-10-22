@@ -484,7 +484,7 @@ function HzTable({ w }: { w: Of<'table'> }) {
                   <View style={[styles.row, styles.gap4]}>
                     <Text
                       style={[
-                        font('700', 10.5),
+                        font('700', 11),
                         styles.shrink,
                         { letterSpacing: 0.4, color: on ? kit.primary : kit.textSecondary },
                       ]}
@@ -1286,7 +1286,7 @@ function JsonNode({ name, value, depth }: { name?: string; value: JsonValue; dep
               {key}
               <Text style={{ color: kit.textMuted }}>{open ? o : `${o} … ${c}  `}</Text>
               {open ? null : (
-                <Text style={[font('400', 10.5), { color: kit.textMuted }]}>{`${entries.length} élément(s)`}</Text>
+                <Text style={[font('400', 11), { color: kit.textMuted }]}>{`${entries.length} élément(s)`}</Text>
               )}
             </Text>
           </View>
@@ -1364,7 +1364,7 @@ function Heatmap({ w }: { w: Of<'heatmap'> }) {
           <View style={styles.row}>
             <View style={styles.heatLabel} />
             {w.cols.map((c, j) => (
-              <Text key={c} style={[font('400', 9.5), styles.heatCol, { color: kit.textMuted }]}>
+              <Text key={c} style={[font('400', 11), styles.heatCol, { color: kit.textMuted }]}>
                 {j % 2 === 0 ? c : ''}
               </Text>
             ))}
@@ -1453,7 +1453,7 @@ function Cards({ w }: { w: Of<'cards'> }) {
                 <Icon source={card.icon} size={18} color={toneColor(tone, kit)} />
               </View>
               <View style={styles.flex} />
-              {card.meta ? <Text style={[font('400', 10.5), { color: kit.textMuted }]}>{card.meta}</Text> : null}
+              {card.meta ? <Text style={[font('400', 11), { color: kit.textMuted }]}>{card.meta}</Text> : null}
             </View>
             <Text numberOfLines={1} style={[font('700', 14), styles.mt8, { color: kit.textPrimary }]}>
               {card.title}
@@ -1499,9 +1499,7 @@ function Compare({ w }: { w: Of<'compare'> }) {
               {rec ? <StatusBadge label="Recommandé" tone="primary" uppercase={false} /> : null}
               <Text style={[font('700', 14), { color: rec ? kit.primary : kit.textPrimary }]}>{name}</Text>
               <Text style={[font('700', 14, 'heading'), { color: kit.textPrimary }]}>{price}</Text>
-              {note ? (
-                <Text style={[font('400', 10.5), styles.centerText, { color: kit.textMuted }]}>{note}</Text>
-              ) : null}
+              {note ? <Text style={[font('400', 11), styles.centerText, { color: kit.textMuted }]}>{note}</Text> : null}
             </View>
           ))}
         </View>
@@ -1553,7 +1551,7 @@ export function HzAttachmentPreview({ a, onRemove }: { a: HzAttachment; onRemove
         <Text numberOfLines={1} style={[font('600', 12), { color: kit.textPrimary }]}>
           {a.name}
         </Text>
-        <Text style={[font('400', 10.5), { color: kit.textMuted }]}>{a.size}</Text>
+        <Text style={[font('400', 11), { color: kit.textMuted }]}>{a.size}</Text>
       </View>
       {onRemove ? (
         <TouchableRipple

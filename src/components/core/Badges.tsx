@@ -62,5 +62,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'flex-start',
   },
-  dotText: font('700', 10.5),
+  dotText: font('700', 11),
 });

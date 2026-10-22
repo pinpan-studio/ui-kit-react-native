@@ -37,6 +37,10 @@ export const kitText = {
   bodySm: style('body', '400', 13, 1.55),
   label: style('body', '600', 12, 1.4),
   caption: style('body', '400', 12, 1.4),
+  /** Petite étiquette (puces, filtres, métadonnées compactes). */
+  labelSm: style('body', '600', 11.5, 1.4),
+  /** Plus petit texte lisible : badges, compteurs, légendes. Jamais pour un texte cliquable. */
+  micro: style('body', '500', 11, 1.35),
   overline: style('body', '700', 11, 1.4, 0.66),
   mono: style('mono', '400', 12.5, 1.5),
   brand: style('brand', '600', 18),
@@ -67,6 +71,8 @@ const TEXT_COLOR: Record<KitTextVariant, keyof KitColors> = {
   bodySm: 'textSecondary',
   label: 'textSecondary',
   caption: 'textMuted',
+  labelSm: 'textSecondary',
+  micro: 'textMuted',
   overline: 'textMuted',
   mono: 'textPrimary',
   brand: 'textPrimary',

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, type ComponentRef, type ReactNode, type Ref } from 'react';
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { Icon } from 'react-native-paper';
 
@@ -40,6 +40,8 @@ export function FormFieldLabel({
 }
 
 export interface KitTextFieldProps extends Omit<TextInputProps, 'style' | 'editable' | 'secureTextEntry'> {
+  /** Accès au champ natif (focus du champ suivant au clavier). */
+  ref?: Ref<ComponentRef<typeof TextInput>>;
   label?: string;
   hint?: string;
   icon?: string;
@@ -201,7 +203,7 @@ export function KitTextField({
 
 const styles = StyleSheet.create({
   label: { ...font('600', 12), marginBottom: 6 },
-  hint: { ...font('400', 11.5), marginTop: space.s1 },
+  hint: { ...font('400', 12), marginTop: space.s1 },
   box: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -34,7 +34,7 @@ export function BlogExample() {
     </View>
   );
   return (
-    <ExPage maxWidth={1200}>
+    <ExPage maxWidth={1200} refreshable>
       <ExHeader
         title="Le blog"
         subtitle="Design, produit et rédaction : ce que nous apprenons en construisant le kit."
