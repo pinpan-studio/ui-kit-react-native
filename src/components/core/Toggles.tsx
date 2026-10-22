@@ -68,12 +68,15 @@ export function KitChip({
   selected = false,
   onPress,
   icon,
+  iconColor,
   check = true,
 }: {
   label: string;
   selected?: boolean;
   onPress?: () => void;
   icon?: string;
+  /** Teinte de l'icône hors sélection (avatar d'`ActionChip` Flutter). */
+  iconColor?: string;
   /** Coche M3 quand la puce est sélectionnée (`showCheckmark` Flutter). */
   check?: boolean;
 }) {
@@ -90,7 +93,7 @@ export function KitChip({
       style={[styles.kitChip, { backgroundColor: selected ? roles.secondaryContainer : kit.fieldBg }]}
     >
       <View style={styles.segmentRow}>
-        {lead ? <Icon source={lead} size={18} color={color} /> : null}
+        {lead ? <Icon source={lead} size={18} color={selected ? color : (iconColor ?? color)} /> : null}
         <Text style={[styles.kitChipLabel, { color }]}>{label}</Text>
       </View>
     </TouchableRipple>

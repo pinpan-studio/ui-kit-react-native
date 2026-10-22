@@ -24,9 +24,7 @@ export default function ShowcasesGallery() {
             {SHOWCASES.filter((s) => s.group === id).map((s) => (
               <KitCard
                 key={s.id}
-                onPress={() =>
-                  'href' in s.target ? router.navigate(s.target.href) : router.push(`/showcases/${s.id}` as never)
-                }
+                onPress={() => router.push(`/showcases/${s.id}` as never)}
                 accessibilityLabel={s.label}
               >
                 <View style={styles.row}>

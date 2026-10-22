@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { EmptyState, KitIconButton } from '../../components';
+import { KitIconButton } from '../../components';
+import { HarnaisScreen } from '../../harnais/HarnaisScreen';
 import { ExAppShell } from '../../showcase/examples/ExAppShell';
 import { ExampleScreen } from '../../showcase/examples/ExampleScreen';
 import { SHOWCASES, type Showcase } from '../../showcase/examples/showcases';
@@ -14,16 +15,8 @@ import { font, space, useKitTheme } from '../../theme';
 function ShowcaseContent({ showcase: s }: { showcase: Showcase }) {
   const t = s.target;
   if ('demo' in t) return <AppShellDemo />;
-  if ('href' in t)
-    return (
-      <EmptyState
-        icon="mi:auto-awesome"
-        title={s.label}
-        subtitle="Le Harnais s’ouvre dans son propre écran."
-        actionLabel="Ouvrir le Harnais"
-        onAction={() => router.navigate(t.href)}
-      />
-    );
+  if ('harnais' in t)
+    return <HarnaisScreen onExit={() => router.back()} initialConversation={t.harnais ?? undefined} />;
   const page = pageExampleBySlug(t.slug)!;
   if (page.shell) return <ExAppShell initial={page.shell} initialParam={t.param} initialChat={t.chat} />;
   return <ExampleScreen page={page} />;

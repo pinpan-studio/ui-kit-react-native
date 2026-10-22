@@ -37,7 +37,7 @@ import {
 } from '../theme';
 
 /** Nombre de widgets que l'assistant du harnais sait afficher. */
-const HARNAIS_WIDGETS = 29;
+const HARNAIS_WIDGETS = 33;
 
 /** Raccourcis vers les sections les plus consultées (catégorie, section). */
 const QUICK: [string, string, string | null, string][] = [

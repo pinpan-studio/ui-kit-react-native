@@ -2,7 +2,7 @@ import { PAGE_EXAMPLES } from '../pageExamples';
 
 /** Écran montré par un showcase : page d'exemple, démo de gabarit ou route du catalogue. */
 export type ShowcaseTarget =
-  { slug: string; chat?: boolean; param?: string } | { demo: 'shell' } | { href: '/harnais' };
+  { slug: string; chat?: boolean; param?: string } | { demo: 'shell' } | { harnais: string | null };
 
 export interface Showcase {
   id: string;
@@ -59,17 +59,10 @@ const s = (
 /** Registre des showcases (`kShowcases` Flutter). */
 export const SHOWCASES: Showcase[] = [
   s('main', 'modules', 'Main', 'mi:space-dashboard', '/main', ['shell', 'rail', 'drawer'], { demo: 'shell' }),
-  s('harnais', 'modules', 'Harnais · accueil', 'mi:auto-awesome', '/harnais', ['IA', 'chat'], { href: '/harnais' }),
-  s(
-    'harnais-conversation',
-    'modules',
-    'Harnais · conversation',
-    'mi:forum',
-    '/harnais/c-sidecar',
-    ['IA', 'artefact'],
-    { href: '/harnais' },
-    'Harnais existant, ouvert depuis son accueil.',
-  ),
+  s('harnais', 'modules', 'Harnais · accueil', 'mi:auto-awesome', '/harnais', ['IA', 'chat'], { harnais: null }),
+  s('harnais-conversation', 'modules', 'Harnais · conversation', 'mi:forum', '/harnais/c-sidecar', ['IA', 'artefact'], {
+    harnais: 'c-sidecar',
+  }),
   ...PAGE_EXAMPLES.filter((p) => p.group === 'Authentification').map((p) =>
     s(`auth-${p.route.slice(5)}`, 'auth', p.title, 'mi:login', `/examples/${p.route}`, ['authentification'], {
       slug: p.slug,
