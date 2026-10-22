@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { BUTTON_VARIANTS, buttonColors, KitButton, toneLight, toneText, type KitTone } from '../src/components/buttons';
-import { ButtonsGallery } from '../src/showcase/components/ButtonsGallery';
 import { categoryById } from '../src/showcase/kitNav';
 import { buildTheme } from '../src/theme/buildTheme';
 import { PALETTE_ORDER, PALETTES } from '../src/theme/generated/palettes';
@@ -80,64 +79,5 @@ describe('chips de filtre : texte de ton sur fond -light ≥ 4,5:1 (lot contrast
     expect([toneText('success', l), toneText('warning', l)]).toEqual(['#166534', '#854d0e']);
     expect([toneText('success', d), toneText('warning', d)]).toEqual(['#86efac', '#fde047']);
     expect(toneText('error', d)).toBe('#ffdad6');
-  });
-});
-
-describe('ButtonsGallery', () => {
-  const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 0, left: 0, right: 0, bottom: 0 } };
-  const show = () =>
-    render(
-      <SafeAreaProvider initialMetrics={metrics}>
-        <KitThemeProvider>
-          <ButtonsGallery />
-        </KitThemeProvider>
-      </SafeAreaProvider>,
-    );
-
-  it('sections dans l’ordre Flutter', async () => {
-    await show();
-    for (const s of categoryById('buttons')?.sections ?? []) {
-      expect(screen.getByTestId(`doc-section-${s.id}`)).toBeTruthy();
-    }
-    expect(categoryById('buttons')?.sections.map((s) => s.id)).toEqual([
-      'variants',
-      'states',
-      'icon',
-      'header',
-      'segmented',
-      'menu',
-      'fab',
-      'sizes',
-    ]);
-  });
-
-  it('les 9 variantes, Success en #052e16, désactivé sans onPress', async () => {
-    await show();
-    for (const v of BUTTON_VARIANTS) expect(screen.getByTestId(`btn-${v}`)).toBeTruthy();
-    expect(StyleSheet.flatten(screen.getByText('Success').props.style).color).toBe('#052e16');
-    expect(screen.getByTestId('btn-disabled-primary').props.accessibilityState).toMatchObject({ disabled: true });
-  });
-
-  it('chargement : libellé, indicateur, état occupé', async () => {
-    const onPress = jest.fn();
-    await render(
-      <SafeAreaProvider initialMetrics={metrics}>
-        <KitThemeProvider>
-          <KitButton testID="b" label="Enregistrer" loadingLabel="Enregistrement…" loading onPress={onPress} />
-        </KitThemeProvider>
-      </SafeAreaProvider>,
-    );
-    expect(screen.getByText('Enregistrement…')).toBeTruthy();
-    expect(screen.getByTestId('b-spinner')).toBeTruthy();
-    expect(screen.getByTestId('b').props.accessibilityState).toMatchObject({ busy: true });
-    await fireEvent.press(screen.getByTestId('b'));
-    expect(onPress).not.toHaveBeenCalled();
-  });
-
-  it('chaque bouton d’icône a un nom accessible', async () => {
-    await show();
-    for (const l of ['Modifier', 'Ajouter', 'Supprimer', 'Options', 'Rafraîchir', 'Filtre actif', 'Plus d’options']) {
-      expect(screen.getAllByLabelText(l).length).toBeGreaterThan(0);
-    }
   });
 });

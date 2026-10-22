@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { navModeFor } from '../src/shell/destinations';
-import { AdaptiveShell } from '../src/shell/AdaptiveShell';
+import { AdaptiveShell, useShellExit } from '../src/shell/AdaptiveShell';
 import { useThemeStore } from '../src/store/themeStore';
 import { KitThemeProvider } from '../src/theme/KitThemeProvider';
 
@@ -25,6 +25,16 @@ beforeEach(() => {
   mockPath = '/';
   mockNavigate.mockClear();
 });
+
+/** Écran immersif de test : sa propre action de sortie, comme le Harnais. */
+function Immersive() {
+  const exit = useShellExit();
+  return (
+    <Pressable accessibilityLabel="Retour au catalogue" onPress={exit}>
+      <Text>Contenu</Text>
+    </Pressable>
+  );
+}
 
 const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 47, left: 0, right: 0, bottom: 34 } };
 
@@ -82,21 +92,23 @@ describe('AdaptiveShell', () => {
     expect(useThemeStore.getState().paletteId).toBe('red');
   });
 
-  it('Harnais : navigation masquée, sortie vers la destination précédente', async () => {
+  it('Harnais : plein écran, sortie vers la destination précédente', async () => {
     mockPath = '/layouts';
-    const r = await renderShell();
-    mockPath = '/harnais';
-    await r.rerender(
+    const tree = () => (
       <SafeAreaProvider initialMetrics={metrics}>
         <KitThemeProvider>
           <AdaptiveShell>
-            <Text>Contenu</Text>
+            <Immersive />
           </AdaptiveShell>
         </KitThemeProvider>
-      </SafeAreaProvider>,
+      </SafeAreaProvider>
     );
+    const r = await render(tree());
+    mockPath = '/harnais';
+    await r.rerender(tree());
+    expect(screen.getByTestId('adaptive-shell-immersive')).toBeTruthy();
     expect(screen.queryByTestId('bottom-bar')).toBeNull();
-    await fireEvent.press(screen.getByLabelText('Quitter le harnais'));
+    await fireEvent.press(screen.getByLabelText('Retour au catalogue'));
     expect(mockNavigate).toHaveBeenCalledWith('/layouts');
   });
 
@@ -105,6 +117,6 @@ describe('AdaptiveShell', () => {
     mockPath = '/harnais';
     await renderShell();
     expect(screen.queryByTestId('side-panel')).toBeNull();
-    expect(screen.getByTestId('exit-harnais')).toBeTruthy();
+    expect(screen.getByTestId('adaptive-shell-immersive')).toBeTruthy();
   });
 });

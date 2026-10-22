@@ -14,7 +14,7 @@ export function KitIconButton({ size = 24, style, ...rest }: Props) {
     <IconButton
       size={size}
       accessibilityRole="button"
-      style={[{ width: box, height: box, margin: 0 }, style]}
+      style={[{ width: box, height: box, borderRadius: box / 2, margin: 0 }, style]}
       {...rest}
     />
   );

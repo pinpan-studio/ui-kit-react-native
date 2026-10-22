@@ -1,14 +1,12 @@
-import { Text } from 'react-native-paper';
+import { useLocalSearchParams } from 'expo-router';
 
-import { Page } from '../shell/Page';
+import { HarnaisScreen } from '../harnais/HarnaisScreen';
+import { useShellExit } from '../shell/AdaptiveShell';
 
-export default function HarnaisPage() {
-  return (
-    <Page testID="harnais">
-      <Text variant="titleLarge" accessibilityRole="header">
-        Harnais
-      </Text>
-      <Text variant="bodyLarge">Harnais de test des composants — étape 2.</Text>
-    </Page>
-  );
+/** Harnais en plein écran ; `?c=<id>` ouvre une conversation au démarrage (`/harnais/:id` Flutter). */
+export default function HarnaisRoute() {
+  const { c } = useLocalSearchParams<{ c?: string }>();
+  const exit = useShellExit();
+  // Une conversation demandée remonte l'écran (store neuf), comme une nouvelle route Flutter.
+  return <HarnaisScreen key={c ?? ''} onExit={exit} initialConversation={c} />;
 }

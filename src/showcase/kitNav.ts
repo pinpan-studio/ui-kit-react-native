@@ -1,9 +1,4 @@
 // Catalogue repris de ui-kit-flutter lib/showcase/kit_nav.dart (fix/success-contrast, 6921a8a).
-import type { ComponentProps } from 'react';
-import type { MaterialCommunityIcons } from '@expo/vector-icons';
-
-type IconName = ComponentProps<typeof MaterialCommunityIcons>['name'];
-
 export interface KitSection {
   id: string;
   label: string;
@@ -12,7 +7,8 @@ export interface KitSection {
 export interface KitCategory {
   id: string;
   label: string;
-  icon: IconName;
+  /** Icône Material de `kit_nav.dart` (`mi:` = MaterialIcons). */
+  icon: string;
   description: string;
   sections: readonly KitSection[];
 }
@@ -21,7 +17,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'typography',
     label: 'Typographie',
-    icon: 'format-text',
+    icon: 'mi:text-fields',
     description:
       'Familles, échelle, hiérarchie, graisses, interlignage, interlettrage, mesure, contraste, chiffres, troncature, typographie française, tailles fluides, testeur.',
     sections: [
@@ -98,7 +94,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'forms',
     label: 'Formulaires',
-    icon: 'form-select',
+    icon: 'mi:edit-note',
     description:
       'Input, textarea, select, autocomplete, dates, checkbox, radio, toggle, upload, recherche, validation.',
     sections: [
@@ -179,7 +175,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'fields',
     label: 'Champs avancés',
-    icon: 'form-textbox',
+    icon: 'mi:dynamic-form',
     description:
       'OTP, nombre +/−, montant FCFA, intervalle, notation, couleur, texte riche, Markdown, signature, tree-select, transfert, tags, adresse, mot de passe, copie.',
     sections: [
@@ -252,7 +248,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'buttons',
     label: 'Boutons',
-    icon: 'gesture-tap-button',
+    icon: 'mi:smart-button',
     description: 'Primary, secondary, outline, ghost, danger, success, icône, loading, disabled.',
     sections: [
       {
@@ -292,7 +288,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'navigation',
     label: 'Navigation',
-    icon: 'compass-outline',
+    icon: 'mi:explore',
     description: 'Header, sidebar, navbar, onglets, breadcrumb, pagination, stepper, menus.',
     sections: [
       {
@@ -332,7 +328,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'data',
     label: 'Data display',
-    icon: 'table',
+    icon: 'mi:table-chart',
     description:
       'Tables (dont table avancée), cartes, listes, liste descriptive, timeline, badges, avatars, compteurs, graphiques, diff, audit log, QR code.',
     sections: [
@@ -409,7 +405,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'feedback',
     label: 'Feedback',
-    icon: 'bell-ring-outline',
+    icon: 'mi:notifications-active',
     description:
       'Alertes, toasts, modales, drawers, confirmation, loaders, skeletons, erreurs, upload multiple, bannière hors ligne, page de résultat, annulation.',
     sections: [
@@ -474,7 +470,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'planning',
     label: 'Planning',
-    icon: 'timeline-outline',
+    icon: 'mi:view-timeline',
     description: 'Kanban, Gantt, notes, vue groupée, calendrier, agenda — modèle générique et filtres optionnels.',
     sections: [
       {
@@ -510,7 +506,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'maps',
     label: 'Cartes',
-    icon: 'map-outline',
+    icon: 'mi:map',
     description: 'Fonds gratuits, marqueurs, clustering, trajets, zones, dessin, mode sombre.',
     sections: [
       {
@@ -550,7 +546,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'media',
     label: 'Médias',
-    icon: 'image-multiple-outline',
+    icon: 'mi:perm-media',
     description: 'Lecteur vidéo, YouTube, lecteur audio, PDF, visionneuse de fichiers, carrousel, recadrage d’image.',
     sections: [
       {
@@ -598,7 +594,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'interactions',
     label: 'Interactions',
-    icon: 'gesture-tap',
+    icon: 'mi:touch-app',
     description:
       'Palette de commandes, raccourcis et gestes, popover riche, visite guidée, centre de notifications, menu contextuel.',
     sections: [
@@ -631,7 +627,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'material',
     label: 'Material',
-    icon: 'puzzle-outline',
+    icon: 'mi:extension',
     description: 'Accordion, tree, drag & drop, chips input, card, grid list, bottom sheet, virtual scroll, ripple.',
     sections: [
       {
@@ -675,7 +671,7 @@ export const KIT_CATEGORIES: readonly KitCategory[] = [
   {
     id: 'layout',
     label: 'Layout',
-    icon: 'view-dashboard-edit-outline',
+    icon: 'mi:dashboard-customize',
     description: 'Page layout, dashboard, colonnes, sidebar, pleine largeur, sections, conteneurs responsive.',
     sections: [
       {

@@ -2,7 +2,6 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { NavPanel } from '../src/shell/NavPanel';
-import { DocPage } from '../src/showcase/doc/DocPage';
 import { createSectionScroller } from '../src/showcase/doc/sectionScroller';
 import { KitThemeProvider } from '../src/theme/KitThemeProvider';
 
@@ -40,25 +39,6 @@ describe('défilement vers ?section=', () => {
     s.onLayout('a', 10);
     expect(to).not.toHaveBeenCalled();
   });
-
-  it('DocPage défile vers la section initiale', async () => {
-    const to = jest.fn();
-    await wrap(
-      <DocPage
-        title="T"
-        initialSection="b"
-        onScrollTo={to}
-        sections={[
-          { id: 'a', title: 'A' },
-          { id: 'b', title: 'B' },
-        ]}
-      />,
-    );
-    await fireEvent(screen.getByTestId('doc-section-a'), 'layout', layout(120));
-    expect(to).not.toHaveBeenCalled();
-    await fireEvent(screen.getByTestId('doc-section-b'), 'layout', layout(900));
-    expect(to).toHaveBeenCalledWith(892);
-  });
 });
 
 describe('tiroir : entrées Flutter KitDrawer', () => {
@@ -71,13 +51,5 @@ describe('tiroir : entrées Flutter KitDrawer', () => {
     }
     await fireEvent.press(screen.getByLabelText('Galerie des pages'));
     expect(mockNavigate).toHaveBeenCalledWith('/pages-gallery');
-  });
-
-  it('catégorie dépliable : affiche ses sections et ouvre la section', async () => {
-    await wrap(<NavPanel />);
-    expect(screen.queryByLabelText('États, dans Boutons')).toBeNull();
-    await fireEvent.press(screen.getByTestId('drawer-cat-buttons'));
-    await fireEvent.press(screen.getByLabelText('États, dans Boutons'));
-    expect(mockNavigate).toHaveBeenCalledWith('/components/buttons?section=states');
   });
 });

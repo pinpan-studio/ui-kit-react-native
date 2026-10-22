@@ -2,7 +2,7 @@ import { MD3DarkTheme, MD3LightTheme, configureFonts, type MD3Theme } from 'reac
 import type { MD3Type } from 'react-native-paper/lib/typescript/types';
 
 import { buildKitColors, getRoles, withAlpha, type ColorMode, type KitColors } from './colors';
-import { fontFamily } from './fonts';
+import { fontFamily, type FontWeight } from './fonts';
 import { TYPE_SCALE } from './generated/tokens';
 import type { M3Roles, PaletteId } from './generated/palettes';
 import { radius } from './tokens';
@@ -17,12 +17,22 @@ export interface KitTheme extends MD3Theme {
 
 type ScaleKey = keyof typeof TYPE_SCALE;
 
+/** Graisses surchargées par `AppTheme` Flutter (titres plus affirmés que l'échelle M3 par défaut). */
+const WEIGHT_OVERRIDES: Partial<Record<ScaleKey, FontWeight>> = {
+  headlineLarge: '700',
+  headlineMedium: '700',
+  headlineSmall: '600',
+  titleLarge: '600',
+  titleMedium: '600',
+};
+
 function buildFonts() {
   const config: Partial<Record<ScaleKey, MD3Type>> = {};
   for (const key of Object.keys(TYPE_SCALE) as ScaleKey[]) {
     const t = TYPE_SCALE[key];
+    const weight = WEIGHT_OVERRIDES[key] ?? (t.weight as FontWeight);
     config[key] = {
-      fontFamily: fontFamily(t.family === 'Outfit' ? 'heading' : 'body', t.weight),
+      fontFamily: fontFamily(t.family === 'Outfit' ? 'heading' : 'body', weight),
       fontSize: t.size,
       lineHeight: t.lineHeight,
       letterSpacing: t.tracking,

@@ -1,10 +1,12 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import { Appbar, BottomNavigation, Modal, Portal } from 'react-native-paper';
+import { Appbar, BottomNavigation } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ModalDrawer } from '../components';
+import { SnackProvider } from '../core/snack';
 import { hapticToggle, KitIconButton, useBackClose } from '../mobile';
 import { categoryById } from '../showcase/kitNav';
 import { useThemeStore } from '../store/themeStore';
@@ -14,25 +16,27 @@ import { NavPanel } from './NavPanel';
 import { NavRail } from './NavRail';
 import { PaletteSheet } from './PaletteSheet';
 
-const EXTRA_TITLES: Record<string, string> = {
-  '/examples': 'Pages d’exemple',
-  '/pages-gallery': 'Galerie des pages',
-  '/showcases': 'Showcases',
-};
+/** Sortie d'un écran immersif (Harnais) : retour à la dernière destination du shell. */
+const ExitContext = createContext<() => void>(() => router.navigate('/'));
+export const useShellExit = () => useContext(ExitContext);
 
 function titleFor(pathname: string): string {
-  const extra = EXTRA_TITLES[pathname];
-  if (extra) return extra;
+  if (pathname === '/') return 'UI Showcase';
   const m = pathname.match(/^\/components\/([^/]+)/);
   if (m?.[1]) return categoryById(m[1])?.label ?? 'Composants';
+  if (pathname === '/pages') return 'Pages d’exemple';
+  if (pathname === '/pages-gallery') return 'Galerie des pages';
+  if (pathname === '/showcases') return 'Showcases';
   return DESTINATIONS[activeIndex(pathname)]?.label ?? 'UI Kit';
 }
 
 /**
  * Shell adaptatif : barre d'application + navigation selon les classes de largeur Material 3 :
  * barre en bas < 600 dp (comme Flutter, avec tiroir), rail 600–840 dp, panneau latéral permanent au-delà.
- * Sur l'onglet Harnais, toute la navigation est masquée (comme kit_shell.dart) et une action de sortie
- * ramène à la destination précédente.
+ * Le Harnais s'affiche en plein écran avec sa propre barre (comme kit_shell.dart) ; sa sortie
+ * (`useShellExit`) ramène à la destination précédente.
+ * Les démos de gabarits (`/layouts/<démo>`) les pages d'exemple (`/pages/<page>`) et les showcases (`/showcases/<id>`) s'affichent en plein écran, avec leur propre barre, comme les
+ * routes poussées par-dessus le shell dans Flutter.
  * Les fonds vont jusqu'aux bords ; le contenu respecte les zones sûres.
  */
 export function AdaptiveShell({ children }: { children: ReactNode }) {
@@ -48,7 +52,6 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
     if (!harnais) lastOutside.current = pathname;
   }, [harnais, pathname]);
   const exitHarnais = useCallback(() => router.navigate(lastOutside.current as never), []);
-  useBackClose(harnais, exitHarnais);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pref = useThemeStore((s) => s.mode);
@@ -68,31 +71,33 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
   };
   const canGoBack = pathname.split('/').filter(Boolean).length > 1;
 
+  if (harnais || /^\/(layouts|pages|showcases)\/[^/]+/.test(pathname))
+    return (
+      <View style={[styles.fill, { backgroundColor: theme.colors.background }]} testID="adaptive-shell-immersive">
+        <ExitContext.Provider value={exitHarnais}>
+          <SnackProvider bottomInset={insets.bottom}>{children}</SnackProvider>
+        </ExitContext.Provider>
+      </View>
+    );
+
   return (
     <View style={[styles.fill, { backgroundColor: theme.colors.background }]} testID={`adaptive-shell-${navMode}`}>
       <Appbar.Header mode="small" statusBarHeight={insets.top} style={{ backgroundColor: theme.colors.surface }}>
-        {harnais ? (
-          <KitIconButton
-            icon="close"
-            accessibilityLabel="Quitter le harnais"
-            onPress={exitHarnais}
-            testID="exit-harnais"
-          />
-        ) : canGoBack ? (
+        {canGoBack ? (
           <Appbar.BackAction accessibilityLabel="Retour" onPress={() => router.back()} />
         ) : navMode !== 'drawer' ? (
           <KitIconButton icon="menu" accessibilityLabel="Ouvrir le menu" onPress={() => setDrawerOpen(true)} />
         ) : null}
         <Appbar.Content title={titleFor(pathname)} titleStyle={{ fontFamily: theme.fonts.titleLarge.fontFamily }} />
         <KitIconButton
-          icon={theme.dark ? 'white-balance-sunny' : 'weather-night'}
+          icon={theme.dark ? 'white-balance-sunny' : 'mi:dark-mode'}
           accessibilityLabel={theme.dark ? 'Passer en mode clair' : 'Passer en mode sombre'}
           accessibilityHint={pref === 'system' ? 'Le mode suit actuellement le système' : undefined}
           onPress={toggleDark}
           testID="toggle-dark"
         />
         <KitIconButton
-          icon="palette-swatch-outline"
+          icon="palette-outline"
           accessibilityLabel="Choisir la palette et le mode"
           onPress={() => setPaletteOpen(true)}
           testID="open-palette"
@@ -100,10 +105,10 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
       </Appbar.Header>
 
       <View style={[styles.fill, styles.row]}>
-        {!harnais && navMode === 'rail' && <NavRail index={index} onSelect={select} insetLeft={insets.left} />}
-        {!harnais && navMode === 'drawer' && (
+        {navMode === 'rail' && <NavRail index={index} onSelect={select} insetLeft={insets.left} />}
+        {navMode === 'drawer' && (
           <View
-            style={[styles.panel, { paddingLeft: insets.left, backgroundColor: theme.roles.surfaceContainerLow }]}
+            style={[styles.panel, { paddingLeft: insets.left, backgroundColor: theme.kit.card }]}
             testID="side-panel"
           >
             <NavPanel />
@@ -112,15 +117,15 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
         <View
           style={[
             styles.fill,
-            { paddingRight: insets.right, paddingLeft: harnais || navMode === 'bar' ? insets.left : 0 },
-            (harnais || navMode !== 'bar') && { paddingBottom: insets.bottom },
+            { paddingRight: insets.right, paddingLeft: navMode === 'bar' ? insets.left : 0 },
+            navMode !== 'bar' && { paddingBottom: insets.bottom },
           ]}
         >
-          {children}
+          <SnackProvider bottomInset={navMode !== 'bar' ? insets.bottom : 0}>{children}</SnackProvider>
         </View>
       </View>
 
-      {!harnais && navMode === 'bar' && (
+      {navMode === 'bar' && (
         <BottomNavigation.Bar
           testID="bottom-bar"
           navigationState={{
@@ -145,19 +150,9 @@ export function AdaptiveShell({ children }: { children: ReactNode }) {
         />
       )}
 
-      <Portal>
-        <Modal
-          visible={drawerOpen}
-          onDismiss={closeDrawer}
-          style={styles.drawerModal}
-          contentContainerStyle={[
-            styles.drawer,
-            { backgroundColor: theme.roles.surfaceContainerLow, paddingTop: insets.top, paddingBottom: insets.bottom },
-          ]}
-        >
-          <NavPanel onNavigate={closeDrawer} />
-        </Modal>
-      </Portal>
+      <ModalDrawer visible={drawerOpen} onDismiss={closeDrawer}>
+        <NavPanel onNavigate={closeDrawer} />
+      </ModalDrawer>
       <PaletteSheet visible={paletteOpen} onDismiss={closePalette} />
     </View>
   );
@@ -167,6 +162,4 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   row: { flexDirection: 'row' },
   panel: { width: 280 },
-  drawerModal: { justifyContent: 'flex-start', alignItems: 'flex-start', margin: 0 },
-  drawer: { width: 300, maxWidth: '85%', height: '100%', borderTopRightRadius: 16, borderBottomRightRadius: 16 },
 });
